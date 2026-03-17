@@ -1,6 +1,8 @@
 
 import html
 import json
+import re
+from datetime import date, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -19,72 +21,143 @@ def load_data():
     return json.loads(DATA_PATH.read_text(encoding="utf-8"))
 
 
+def normalize_team_name(name: str) -> str:
+    s = (name or "").lower().strip()
+    s = s.replace("&", " and ")
+    s = s.replace("st.", "saint")
+    s = s.replace("st ", "saint ")
+    s = s.replace("(oh)", " ohio")
+    s = s.replace("/", " ")
+    s = re.sub(r"[^a-z0-9]+", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def team_aliases(team_name: str):
+    raw = (team_name or "").strip()
+    parts = [p.strip() for p in raw.split("/") if p.strip()]
+    aliases = {normalize_team_name(raw)}
+    for p in parts:
+        aliases.add(normalize_team_name(p))
+    manual = {
+        "saint mary s": ["saint marys", "saint mary s", "saint mary's"],
+        "north carolina": ["unc", "north carolina"],
+        "miami ohio smu": ["miami ohio", "smu"],
+        "umbc howard": ["umbc", "howard"],
+        "lehigh prairie view a m": ["lehigh", "prairie view a m", "prairie view am"],
+        "texas nc state": ["texas", "nc state"],
+        "saint john s": ["saint johns", "st john s", "st johns"],
+    }
+    norm_raw = normalize_team_name(raw)
+    if norm_raw in manual:
+        aliases.update(manual[norm_raw])
+    return aliases
+
+
 @st.cache_data(ttl=45, show_spinner=False)
-def fetch_espn_scoreboard():
-    url = "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard"
-    try:
-        r = requests.get(url, params={"groups": 50, "limit": 300}, timeout=15)
-        r.raise_for_status()
-        data = r.json()
-    except Exception as exc:
-        return {"ok": False, "error": str(exc), "games": [], "team_map": {}}
-
-    games = []
+def fetch_espn_results():
+    base_url = "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard"
     team_map = {}
-    for event in data.get("events", []):
-        comps = event.get("competitions", [])
-        if not comps:
-            continue
-        competitors = comps[0].get("competitors", [])
-        if len(competitors) != 2:
-            continue
+    games = []
 
-        status_desc = event.get("status", {}).get("type", {}).get("description", "") or ""
-        status_detail = event.get("status", {}).get("type", {}).get("shortDetail", "") or ""
-
-        parsed = []
-        for comp in competitors:
-            team_name = comp.get("team", {}).get("displayName", "") or ""
-            parsed.append(
-                {
-                    "team": team_name,
-                    "score": str(comp.get("score", "") or ""),
-                    "winner": bool(comp.get("winner", False)),
-                    "home_away": comp.get("homeAway", "") or "",
-                }
-            )
-
-        if len(parsed) != 2:
+    today = date.today()
+    for offset in range(-21, 2):
+        d = today + timedelta(days=offset)
+        datestr = d.strftime("%Y%m%d")
+        try:
+            r = requests.get(base_url, params={"groups": 50, "limit": 300, "dates": datestr}, timeout=12)
+            r.raise_for_status()
+            data = r.json()
+        except Exception:
             continue
 
-        game = {
-            "matchup": event.get("shortName", "") or "",
-            "status": status_desc,
-            "detail": status_detail,
-            "teams": parsed,
-        }
-        games.append(game)
+        for event in data.get("events", []):
+            comps = event.get("competitions", [])
+            if not comps:
+                continue
+            competitors = comps[0].get("competitors", [])
+            if len(competitors) != 2:
+                continue
 
-        opp0 = parsed[1]["team"]
-        opp1 = parsed[0]["team"]
-        team_map[parsed[0]["team"]] = {
-            "score": parsed[0]["score"],
-            "opp": opp0,
-            "opp_score": parsed[1]["score"],
-            "status": status_desc,
-            "detail": status_detail,
-            "winner": parsed[0]["winner"],
-        }
-        team_map[parsed[1]["team"]] = {
-            "score": parsed[1]["score"],
-            "opp": opp1,
-            "opp_score": parsed[0]["score"],
-            "status": status_desc,
-            "detail": status_detail,
-            "winner": parsed[1]["winner"],
-        }
+            status_desc = event.get("status", {}).get("type", {}).get("description", "") or ""
+            status_detail = event.get("status", {}).get("type", {}).get("shortDetail", "") or ""
 
-    return {"ok": True, "error": "", "games": games, "team_map": team_map}
+            parsed = []
+            for comp in competitors:
+                team_name = comp.get("team", {}).get("displayName", "") or ""
+                parsed.append(
+                    {
+                        "team": team_name,
+                        "score": str(comp.get("score", "") or ""),
+                        "winner": bool(comp.get("winner", False)),
+                    }
+                )
+
+            if len(parsed) != 2:
+                continue
+
+            game = {
+                "matchup": event.get("shortName", "") or "",
+                "status": status_desc,
+                "detail": status_detail,
+                "teams": parsed,
+            }
+            games.append(game)
+
+            for i, t in enumerate(parsed):
+                opp = parsed[1 - i]
+                key = normalize_team_name(t["team"])
+                existing = team_map.get(key)
+                priority = 2 if status_desc.lower() == "final" else 1 if status_desc.lower() == "in progress" else 0
+                existing_priority = existing.get("_priority", -1) if existing else -1
+                if priority >= existing_priority:
+                    team_map[key] = {
+                        "score": t["score"],
+                        "opp": opp["team"],
+                        "opp_score": opp["score"],
+                        "status": status_desc,
+                        "detail": status_detail,
+                        "winner": t["winner"],
+                        "_priority": priority,
+                    }
+
+    for v in team_map.values():
+        v.pop("_priority", None)
+
+    return {"ok": True, "games": games, "team_map": team_map}
+
+
+def get_live_for_team(team_name: str, live_map: dict):
+    for alias in team_aliases(team_name):
+        if alias in live_map:
+            return live_map[alias]
+    return None
+
+
+def decide_winner(team_a, team_b, games):
+    if not team_a or not team_b:
+        return None
+    aliases_a = team_aliases(team_a["team"])
+    aliases_b = team_aliases(team_b["team"])
+
+    for game in reversed(games):
+        if game["status"].lower() != "final":
+            continue
+        teams = game["teams"]
+        g0 = normalize_team_name(teams[0]["team"])
+        g1 = normalize_team_name(teams[1]["team"])
+        cond = ((g0 in aliases_a and g1 in aliases_b) or (g0 in aliases_b and g1 in aliases_a))
+        if not cond:
+            continue
+
+        for t in teams:
+            if t["winner"]:
+                winner_norm = normalize_team_name(t["team"])
+                if winner_norm in aliases_a:
+                    return team_a
+                if winner_norm in aliases_b:
+                    return team_b
+    return None
 
 
 def person_color(name: str) -> str:
@@ -110,8 +183,7 @@ def money_icon_html() -> str:
 
 
 def live_line_html(team_row, live_map) -> str:
-    team_name = str(team_row.get("team", "") or "")
-    live = live_map.get(team_name)
+    live = get_live_for_team(str(team_row.get("team", "") or ""), live_map)
     if not live:
         return ""
 
@@ -122,9 +194,7 @@ def live_line_html(team_row, live_map) -> str:
     opp_score = safe_text(live.get("opp_score", "") or "")
     winner = bool(live.get("winner", False))
 
-    if "STATUS_HALFTIME" in status.upper():
-        label = "HALF"
-    elif status.lower() == "in progress":
+    if status.lower() == "in progress":
         label = "LIVE"
     elif status.lower() == "final":
         label = "W" if winner else "L"
@@ -199,24 +269,45 @@ def region_matchups(region_df: pd.DataFrame):
     return [(seed_to_row[a], seed_to_row[b]) for a, b in order]
 
 
-def build_region_html(region_df: pd.DataFrame, region_name: str, live_map):
+def build_region_html(region_df: pd.DataFrame, region_name: str, live_map, games):
     matchups = region_matchups(region_df)
     placements = []
 
+    r64_winners = []
     for i, (a, b) in enumerate(matchups):
         row_start = 1 + i * 2
         placements.append(f'<div class="placed" style="grid-column:1;grid-row:{row_start} / span 1;">{matchup_card(a,b,live_map)}</div>')
+        r64_winners.append(decide_winner(a, b, games))
 
-    for i in range(4):
+    r32_pairs = [(r64_winners[0], r64_winners[1]), (r64_winners[2], r64_winners[3]), (r64_winners[4], r64_winners[5]), (r64_winners[6], r64_winners[7])]
+    r32_winners = []
+    for i, (a, b) in enumerate(r32_pairs):
         row_start = 2 + i * 4
-        placements.append(f'<div class="placed" style="grid-column:2;grid-row:{row_start} / span 1;">{tbd_round_card("Round of 32", live_map)}</div>')
+        card = matchup_card(a, b, live_map, "Round of 32") if a and b else tbd_round_card("Round of 32", live_map)
+        placements.append(f'<div class="placed" style="grid-column:2;grid-row:{row_start} / span 1;">{card}</div>')
+        r32_winners.append(decide_winner(a, b, games) if a and b else None)
 
-    for i in range(2):
+    s16_pairs = [(r32_winners[0], r32_winners[1]), (r32_winners[2], r32_winners[3])]
+    s16_winners = []
+    for i, (a, b) in enumerate(s16_pairs):
         row_start = 4 + i * 8
-        placements.append(f'<div class="placed" style="grid-column:3;grid-row:{row_start} / span 1;">{tbd_round_card("Sweet 16", live_map, money_round=True)}</div>')
+        card = matchup_card(a, b, live_map, "Sweet 16", money_round=True) if a and b else tbd_round_card("Sweet 16", live_map, money_round=True)
+        placements.append(f'<div class="placed" style="grid-column:3;grid-row:{row_start} / span 1;">{card}</div>')
+        s16_winners.append(decide_winner(a, b, games) if a and b else None)
 
-    placements.append(f'<div class="placed" style="grid-column:4;grid-row:8 / span 1;">{tbd_round_card("Elite 8", live_map, money_round=True)}</div>')
-    placements.append(f'<div class="placed" style="grid-column:5;grid-row:8 / span 1;">{tbd_round_card("Final Four", live_map, money_round=True)}</div>')
+    if s16_winners[0] and s16_winners[1]:
+        elite_card = matchup_card(s16_winners[0], s16_winners[1], live_map, "Elite 8", money_round=True)
+        elite_winner = decide_winner(s16_winners[0], s16_winners[1], games)
+    else:
+        elite_card = tbd_round_card("Elite 8", live_map, money_round=True)
+        elite_winner = None
+    placements.append(f'<div class="placed" style="grid-column:4;grid-row:8 / span 1;">{elite_card}</div>')
+
+    if elite_winner:
+        ff_card = matchup_card(elite_winner, None, live_map, "Final Four", money_round=True)
+    else:
+        ff_card = tbd_round_card("Final Four", live_map, money_round=True)
+    placements.append(f'<div class="placed" style="grid-column:5;grid-row:8 / span 1;">{ff_card}</div>')
 
     return f'''
     <div class="region-section">
@@ -228,7 +319,7 @@ def build_region_html(region_df: pd.DataFrame, region_name: str, live_map):
     '''
 
 
-def render_visual_bracket(df: pd.DataFrame, live_map):
+def render_visual_bracket(df: pd.DataFrame, live_map, games):
     ordered_regions = ["South", "West", "East", "Midwest"]
 
     st.markdown(
@@ -313,14 +404,23 @@ def render_visual_bracket(df: pd.DataFrame, live_map):
     </div>
     '''
     st.markdown(
-        '<div class="bracket-wrap"><div class="mobile-note">Public bracket only. Sweet 16 and later rounds are money games. Live scores appear inside team cards when ESPN has them available. Swipe sideways inside a region if needed.</div><div class="legend">'
+        '<div class="bracket-wrap"><div class="mobile-note">Public bracket only. Sweet 16 and later rounds are money games. This page auto-refreshes and automatically advances final winners into later rounds when ESPN has the results. Swipe sideways inside a region if needed.</div><div class="legend">'
         + legend_html + '</div>' + title_html + '</div>',
         unsafe_allow_html=True
     )
 
     for region in ordered_regions:
         region_df = df[df["region"] == region]
-        st.markdown(build_region_html(region_df, region, live_map), unsafe_allow_html=True)
+        st.markdown(build_region_html(region_df, region, live_map, games), unsafe_allow_html=True)
+
+
+@st.fragment(run_every="45s")
+def live_bracket_fragment(df: pd.DataFrame):
+    results = fetch_espn_results()
+    live_map = results.get("team_map", {}) if results.get("ok") else {}
+    games = results.get("games", [])
+    render_visual_bracket(df, live_map, games)
+    st.caption("Auto-refreshing every 45 seconds.")
 
 
 def main():
@@ -331,13 +431,10 @@ def main():
         st.error("No teams found in teams.json")
         return
 
-    live = fetch_espn_scoreboard()
-    live_map = live.get("team_map", {}) if live.get("ok") else {}
-
     st.title("🏀 2026 Todaro March Madness")
     st.caption("Public bracket view")
 
-    render_visual_bracket(teams, live_map)
+    live_bracket_fragment(teams)
 
 
 if __name__ == "__main__":
