@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-03-18 22:39:11 UTC",
+  "last_updated": "2026-03-18 22:41:07 UTC",
   "teams": [
     {
       "region": "East",
       "seed": 1,
       "team": "Duke",
       "slot_note": "",
-      "assigned_name": "Rob",
+      "assigned_name": "",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
