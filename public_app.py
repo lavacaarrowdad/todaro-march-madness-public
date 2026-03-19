@@ -13,7 +13,7 @@ import streamlit as st
 APP_TITLE = "2026 Todaro March Madness"
 DATA_PATH = Path(__file__).with_name("teams.json")
 LOCKED_RESULTS_PATH = Path(__file__).with_name("locked_results.json")
-BUILD_TIMESTAMP_CT = "Mar 19, 2026 1:42 PM CT"
+BUILD_TIMESTAMP_CT = "Mar 19, 2026 4:30 PM CT"
 
 TICKET_VALUES = {"Sweet 16": 1, "Elite 8": 2, "Elite Eight": 2, "Final Four": 3, "Championship": 4, "Champion": 4}
 FIRST_ROUND_ORDER = [(1, 16), (8, 9), (5, 12), (4, 13), (6, 11), (3, 14), (7, 10), (2, 15)]
@@ -137,7 +137,7 @@ def fetch_recent_espn():
                 parsed.append({"team": c.get("team", {}).get("displayName", "") or "", "score": str(c.get("score", "") or ""), "winner": bool(c.get("winner", False))})
             game = {"status": status, "detail": detail, "ct_time": ct_time, "teams": parsed}
             games.append(game)
-            priority = 2 if status.lower() == "final" else 1 if status.lower() == "in progress" else 0
+            priority = 2 if status.lower() == "final" else 1 if any(x in status.lower() for x in ["in progress", "halftime", "end of", "delayed"]) else 0
             for i, t in enumerate(parsed):
                 opp = parsed[1 - i]
                 key = normalize_team_name(t["team"])
@@ -238,6 +238,10 @@ def totals_by_name(df: pd.DataFrame):
             totals[name] = totals.get(name, 0) + tickets_for(row)
     return totals
 
+def is_live_like(status: str) -> bool:
+    s = (status or "").lower()
+    return any(x in s for x in ["in progress", "halftime", "end of", "delayed"]) and "final" not in s
+
 def matchup_info_line(team_a, team_b, live_map, recent_games, prefer_top_team=False):
     info = matchup_game_for_card(team_a, team_b, live_map, recent_games, prefer_top_team=prefer_top_team)
     if not info:
@@ -247,7 +251,7 @@ def matchup_info_line(team_a, team_b, live_map, recent_games, prefer_top_team=Fa
     detail = str(info.get("detail", "") or "").strip()
     if not ct_time and not detail and not status:
         return ""
-    label = "LIVE" if status.lower() == "in progress" else "FINAL" if status.lower() == "final" else "SCHED"
+    label = "LIVE" if is_live_like(status) else "FINAL" if status.lower() == "final" else "SCHED"
     detail_html = f'<span class="matchup-detail">{safe(detail)}</span>' if detail else ""
     time_html = f'<span class="matchup-time">{safe(ct_time)}</span>' if ct_time else ""
     return f'<div class="matchup-meta"><span class="matchup-chip">{safe(label)}</span>{time_html}{detail_html}</div>'
@@ -261,7 +265,7 @@ def live_line(row, live_map):
     status = str(live.get("status", "") or "")
     if status.lower() == "scheduled":
         return ""
-    label = "LIVE" if status.lower() == "in progress" else ("W" if live.get("winner") else "L") if status.lower() == "final" else ""
+    label = "LIVE" if is_live_like(status) else ("W" if live.get("winner") else "L") if status.lower() == "final" else ""
     if not label:
         return ""
     my_aliases = team_aliases(lookup_name(row))
@@ -308,31 +312,6 @@ def region_matchups(region_df):
     seed_to_row = {int(r["seed"]): r.to_dict() for _, r in region_df.iterrows()}
     return [(seed_to_row[a], seed_to_row[b]) for a, b in FIRST_ROUND_ORDER]
 
-def build_region(region_df, region_name, live_map, recent_games, locked_games):
-    m = region_matchups(region_df); placed = []; r64 = []
-    for i, (a, b) in enumerate(m):
-        placed.append(f'<div class="placed" style="grid-column:1;grid-row:{1+i*2} / span 1;">{matchup_card(a,b,live_map,recent_games,prefer_top_team=True)}</div>')
-        r64.append(decide_winner(a,b,recent_games,locked_games))
-    pairs32 = [(r64[0],r64[1]),(r64[2],r64[3]),(r64[4],r64[5]),(r64[6],r64[7])]
-    w32 = []
-    for i, (a,b) in enumerate(pairs32):
-        placed.append(f'<div class="placed" style="grid-column:2;grid-row:{2+i*4} / span 1;">{matchup_card(a,b,live_map,recent_games,"Round of 32") if a and b else matchup_card(None,None,live_map,recent_games,"Round of 32")}</div>')
-        w32.append(decide_winner(a,b,recent_games,locked_games) if a and b else None)
-    pairs16 = [(w32[0],w32[1]),(w32[2],w32[3])]
-    w16 = []
-    for i, (a,b) in enumerate(pairs16):
-        placed.append(f'<div class="placed" style="grid-column:3;grid-row:{4+i*8} / span 1;">{matchup_card(a,b,live_map,recent_games,"Sweet 16",1) if a and b else matchup_card(None,None,live_map,recent_games,"Sweet 16",1)}</div>')
-        w16.append(decide_winner(a,b,recent_games,locked_games) if a and b else None)
-    if w16[0] and w16[1]:
-        elite = matchup_card(w16[0],w16[1],live_map,recent_games,"Elite 8",2)
-        welite = decide_winner(w16[0],w16[1],recent_games,locked_games)
-    else:
-        elite = matchup_card(None,None,live_map,recent_games,"Elite 8",2); welite = None
-    placed.append(f'<div class="placed" style="grid-column:4;grid-row:8 / span 1;">{elite}</div>')
-    ff = matchup_card(welite,None,live_map,recent_games,"Final Four",3) if welite else matchup_card(None,None,live_map,recent_games,"Final Four",3)
-    placed.append(f'<div class="placed" style="grid-column:5;grid-row:8 / span 1;">{ff}</div>')
-    return f'<div class="region-section"><div class="region-name">{safe(region_name)}</div><div class="region-board">{"".join(placed)}</div></div>'
-
 def matchup_list_card_html(team1, team2, meta, detail, label, score_line=""):
     cls = "matchup-list-card"
     if label == "LIVE": cls += " live"
@@ -351,7 +330,7 @@ def render_matchup_list(df, live_map, recent_games):
                 label = ""; score_line = ""
                 if info:
                     status = str(info.get("status","") or "")
-                    label = "LIVE" if status.lower()=="in progress" else "FINAL" if status.lower()=="final" else "SCHED"
+                    label = "LIVE" if is_live_like(status) else "FINAL" if status.lower()=="final" else "SCHED"
                     meta = f"{label} · {info.get('ct_time','')}"
                     detail = info.get("detail","")
                     teams = info.get("teams", [])
@@ -382,7 +361,6 @@ def render_header(df, locked_results):
     timestamp_block = f'<div class="timestamp-strip"><div class="timestamp-row"><span><strong>App build:</strong> {safe(BUILD_TIMESTAMP_CT)}</span><span><strong>Last page refresh:</strong> {safe(ct_now_str())}</span><span><strong>{locked_note}</strong></span></div></div>'
     css = """
     <style>
-    html, body, [data-testid="stAppViewContainer"], [data-testid="stVerticalBlock"] {overflow-y: visible !important;}
     .main .block-container{padding-top:1rem;padding-bottom:4rem;max-width:100%;}
     .bracket-wrap{padding:8px 0 24px 0;}
     .mobile-note{color:#667085;font-size:13px;margin:0 0 14px 4px;}
@@ -400,34 +378,6 @@ def render_header(df, locked_results):
     .totals-title{font-size:16px;font-weight:800;color:#182230;margin-bottom:10px;}
     .totals-grid{display:flex;gap:12px;flex-wrap:wrap;}
     .total-chip{border:1px solid #d8e5dc;border-radius:999px;padding:8px 12px;font-size:13px;font-weight:700;color:#14532d;background:#f3fff5;display:inline-flex;align-items:center;gap:8px;}
-    .region-section{background:#fff;border:1px solid #e7ebf2;border-radius:20px;padding:18px 16px;margin-bottom:18px;overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;}
-    .region-name{font-size:28px;font-weight:800;margin:2px 0 14px 6px;color:#182230;}
-    .region-board{display:grid;grid-template-columns:220px 220px 220px 220px 220px;grid-template-rows:repeat(15,146px);column-gap:16px;row-gap:14px;align-items:start;min-width:1164px;}
-    .placed{align-self:start;}
-    .match-card{width:220px;background:#f7f4f0;border:1px solid #ebe3da;border-radius:16px;padding:10px 10px 8px;box-shadow:0 1px 0 rgba(0,0,0,.02);box-sizing:border-box;height:146px;}
-    .match-card.money-round-card{background:#eefbf0;border-color:#9ed3a7;}
-    .match-title{font-size:11px;font-weight:700;text-transform:uppercase;color:#7a6d61;margin-bottom:6px;letter-spacing:.35px;}
-    .match-title.money-round-title{color:#187a2f;}
-    .matchup-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:10px;color:#475467;}
-    .matchup-chip{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:16px;border-radius:999px;background:#344054;color:#fff;padding:0 6px;font-size:9px;font-weight:800;line-height:1;}
-    .matchup-time{color:#14532d;font-weight:700;}
-    .matchup-detail{color:#667085;}
-    .team-row{background:#f5f7fb;border:1px solid rgba(0,0,0,.04);border-radius:10px;padding:8px 9px;margin-top:6px;}
-    .team-row.tbd{background:#fbfbfd;}
-    .team-row.money-team{border-color:#73c285;box-shadow: inset 0 0 0 1px rgba(31,130,52,.18);}
-    .team-main{display:flex;gap:8px;align-items:center;line-height:1.15;}
-    .seed{font-size:12px;font-weight:800;color:#475467;min-width:15px;}
-    .team-name{font-size:14px;font-weight:700;color:#182230;max-width:110px;}
-    .team-sub{font-size:11px;color:#667085;margin-top:4px;}
-    .team-status{font-size:11px;color:#187a2f;margin-top:4px;font-weight:700;display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
-    .money-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:#1f9f43;color:#fff;font-size:12px;font-weight:800;line-height:1;}
-    .money-bills{font-size:13px;line-height:1;}
-    .live-line{margin-top:4px;font-size:10px;color:#166534;display:flex;gap:4px;align-items:center;flex-wrap:wrap;background:#ecfdf3;border:1px solid #86efac;border-radius:8px;padding:3px 6px;}
-    .live-line.final{color:#991b1b;background:#fef2f2;border:1px solid #fca5a5;}
-    .live-chip{display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:16px;border-radius:999px;background:#15803d;color:#fff;padding:0 6px;font-size:9px;font-weight:800;line-height:1;}
-    .live-line.final .live-chip{background:#b91c1c;}
-    .live-time{color:#14532d;font-weight:700;}
-    .live-detail{color:#667085;}
     .matchup-list-card{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;margin-bottom:10px;background:#ffffff;}
     .matchup-list-card.live{background:#ecfdf3;border-color:#86efac;}
     .matchup-list-card.final{background:#fef2f2;border-color:#fca5a5;}
@@ -437,38 +387,22 @@ def render_header(df, locked_results):
     .matchup-list-card.live .matchup-list-score{color:#166534;}
     .matchup-list-card.final .matchup-list-score{color:#991b1b;}
     .matchup-list-detail{margin-top:4px;font-size:12px;color:#6b7280;}
-    @media (max-width: 768px) {
-      .region-section{padding:14px 10px;margin-bottom:16px;}
-      .region-name{font-size:22px;margin:2px 0 10px 4px;}
-      .region-board{grid-template-columns:190px 190px 190px 190px 190px;grid-template-rows:repeat(15,136px);min-width:1014px;column-gap:12px;row-gap:12px;}
-      .match-card{width:190px;height:136px;padding:8px 8px 6px;}
-      .title-box{width:180px;}
-      .team-name{max-width:95px;font-size:13px;}
-      .team-sub,.team-status,.live-line,.matchup-meta{font-size:9px;}
-      .matchup-list-score{font-size:18px;}
-    }
+    @media (max-width: 768px) {.matchup-list-score{font-size:18px;}}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
-    st.markdown('<div class="bracket-wrap"><div class="mobile-note">Only today-forward games are used for schedule and score display. On phones, switch to Matchups or Standings for easier navigation.</div>' + timestamp_block + '<div class="legend">' + legend_html + '</div>' + totals_block + title_html + '</div>', unsafe_allow_html=True)
-
-def render_matchups_and_views(df, live_map, recent_games, locked_results):
-    render_header(df, locked_results)
-    view = st.segmented_control("View", options=["Matchups", "Bracket", "Standings"], default="Matchups", width="stretch")
-    if view == "Matchups":
-        render_matchup_list(df, live_map, recent_games)
-    elif view == "Standings":
-        render_standings(df)
-    else:
-        locked_games = locked_results.get("games", [])
-        for region in ["South","West","East","Midwest"]:
-            st.markdown(build_region(df[df["region"] == region], region, live_map, recent_games, locked_games), unsafe_allow_html=True)
+    st.markdown('<div class="bracket-wrap"><div class="mobile-note">Halftime and other in-game pause states now count as live, so their scores still show.</div>' + timestamp_block + '<div class="legend">' + legend_html + '</div>' + totals_block + title_html + '</div>', unsafe_allow_html=True)
 
 @st.fragment(run_every="45s")
 def live_bracket_fragment(df: pd.DataFrame):
     recent = fetch_recent_espn()
     locked = merge_finals_into_locked(recent.get("games", []))
-    render_matchups_and_views(df, recent.get("team_map", {}), recent.get("games", []), locked)
+    render_header(df, locked)
+    view = st.segmented_control("View", options=["Matchups", "Standings"], default="Matchups", width="stretch")
+    if view == "Matchups":
+        render_matchup_list(df, recent.get("team_map", {}), recent.get("games", []))
+    else:
+        render_standings(df)
     st.caption("Auto-refreshing every 45 seconds.")
 
 def main():
