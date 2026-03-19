@@ -359,7 +359,7 @@ def render_matchup_list(df, live_map, recent_games):
                     meta = "No current game found"; detail = ""
                 t1 = f"{a.get('team','TBD')} ({a.get('assigned_name','').strip() or 'Unassigned'})"
                 t2 = f"{b.get('team','TBD')} ({b.get('assigned_name','').strip() or 'Unassigned'})"
-                st.markdown(f"**{t1}**  \nvs  \n**{t2}**  \n{meta}" + (f"  \n{detail}" if detail else ""))
+                st.markdown(matchup_list_card_html(t1, t2, meta, detail, label if info else ""), unsafe_allow_html=True)
                 live_a = get_live_for_team(a, live_map)
                 if live_a and str(live_a.get("status","")).lower() in {"in progress","final"}:
                     game = live_a.get("game") or {}
@@ -375,6 +375,22 @@ def render_standings(df):
         st.info("No tickets won yet."); return
     rows = [{"Name": k, "Tickets": v} for k, v in sorted(totals.items(), key=lambda x: (-x[1], x[0].lower()))]
     st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
+
+
+def matchup_list_card_html(team1, team2, meta, detail, label):
+    cls = "matchup-list-card"
+    if label == "LIVE":
+        cls += " live"
+    elif label == "FINAL":
+        cls += " final"
+    detail_html = f'<div class="matchup-list-detail">{safe(detail)}</div>' if detail else ""
+    return (
+        f'<div class="{cls}">'
+        f'<div class="matchup-list-teams"><div><strong>{safe(team1)}</strong></div><div>vs</div><div><strong>{safe(team2)}</strong></div></div>'
+        f'<div class="matchup-list-meta">{safe(meta)}</div>'
+        f'{detail_html}'
+        f'</div>'
+    )
 
 def render_header(df, locked_results):
     assigned = sorted({str(x).strip() for x in df["assigned_name"].fillna("") if str(x).strip()})[:10]
@@ -433,6 +449,12 @@ def render_header(df, locked_results):
     .live-line.final .live-chip{background:#b91c1c;}
     .live-time{color:#14532d;font-weight:700;}
     .live-detail{color:#667085;}
+    .matchup-list-card{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;margin-bottom:8px;background:#ffffff;}
+    .matchup-list-card.live{background:#ecfdf3;border-color:#86efac;}
+    .matchup-list-card.final{background:#fef2f2;border-color:#fca5a5;}
+    .matchup-list-teams{display:flex;flex-direction:column;gap:2px;color:#111827;}
+    .matchup-list-meta{margin-top:6px;font-size:12px;font-weight:700;color:#374151;}
+    .matchup-list-detail{margin-top:2px;font-size:12px;color:#6b7280;}
     @media (max-width: 768px) {
         .region-section{padding:14px 10px;margin-bottom:16px;}
         .region-name{font-size:22px;margin:2px 0 10px 4px;}
