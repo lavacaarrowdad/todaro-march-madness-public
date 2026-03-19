@@ -1,645 +1,709 @@
 {
-  "last_updated": "2026-03-19 01:05:02 UTC",
+  "last_updated": "2026-03-19 15:48:40 UTC",
   "teams": [
     {
       "region": "East",
       "seed": 1,
-      "team": "Duke",
+      "team": "Duke Blue Devils",
       "slot_note": "",
       "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Duke Blue Devils"
     },
     {
       "region": "East",
       "seed": 16,
-      "team": "Siena",
+      "team": "Siena Saints",
       "slot_note": "",
       "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Siena Saints"
     },
     {
       "region": "East",
       "seed": 8,
-      "team": "Ohio State",
+      "team": "Ohio State Buckeyes",
       "slot_note": "",
       "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Ohio State Buckeyes"
     },
     {
       "region": "East",
       "seed": 9,
-      "team": "TCU",
+      "team": "TCU Horned Frogs",
       "slot_note": "",
       "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "TCU Horned Frogs"
     },
     {
       "region": "East",
       "seed": 5,
-      "team": "St. John's",
+      "team": "St. John's Red Storm",
       "slot_note": "",
       "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "St. John's Red Storm"
     },
     {
       "region": "East",
       "seed": 12,
-      "team": "Northern Iowa",
+      "team": "Northern Iowa Panthers",
       "slot_note": "",
       "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Northern Iowa Panthers"
     },
     {
       "region": "East",
       "seed": 4,
-      "team": "Kansas",
+      "team": "Kansas Jayhawks",
       "slot_note": "",
       "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Kansas Jayhawks"
     },
     {
       "region": "East",
       "seed": 13,
-      "team": "Cal Baptist",
+      "team": "California Baptist Lancers",
       "slot_note": "",
       "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "California Baptist Lancers"
     },
     {
       "region": "East",
       "seed": 6,
-      "team": "Louisville",
+      "team": "Louisville Cardinals",
       "slot_note": "",
       "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Louisville Cardinals"
     },
     {
       "region": "East",
       "seed": 11,
-      "team": "South Florida",
+      "team": "South Florida Bulls",
       "slot_note": "",
       "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "South Florida Bulls"
     },
     {
       "region": "East",
       "seed": 3,
-      "team": "Michigan State",
+      "team": "Michigan State Spartans",
       "slot_note": "",
       "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Michigan State Spartans"
     },
     {
       "region": "East",
       "seed": 14,
-      "team": "North Dakota State",
+      "team": "North Dakota State Bison",
       "slot_note": "",
       "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "North Dakota State Bison"
     },
     {
       "region": "East",
       "seed": 7,
-      "team": "UCLA",
+      "team": "UCLA Bruins",
       "slot_note": "",
       "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "UCLA Bruins"
     },
     {
       "region": "East",
       "seed": 10,
-      "team": "UCF",
+      "team": "UCF Knights",
       "slot_note": "",
       "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "UCF Knights"
     },
     {
       "region": "East",
       "seed": 2,
-      "team": "UConn",
+      "team": "UConn Huskies",
       "slot_note": "",
       "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "UConn Huskies"
     },
     {
       "region": "East",
       "seed": 15,
-      "team": "Furman",
+      "team": "Furman Paladins",
       "slot_note": "",
       "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Furman Paladins"
     },
     {
       "region": "West",
       "seed": 1,
-      "team": "Arizona",
+      "team": "Arizona Wildcats",
       "slot_note": "",
       "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Arizona Wildcats"
     },
     {
       "region": "West",
       "seed": 16,
-      "team": "LIU",
+      "team": "Long Island University Sharks",
       "slot_note": "",
       "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Long Island University Sharks"
     },
     {
       "region": "West",
       "seed": 8,
-      "team": "Villanova",
+      "team": "Villanova Wildcats",
       "slot_note": "",
       "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Villanova Wildcats"
     },
     {
       "region": "West",
       "seed": 9,
-      "team": "Utah State",
+      "team": "Utah State Aggies",
       "slot_note": "",
       "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Utah State Aggies"
     },
     {
       "region": "West",
       "seed": 5,
-      "team": "Wisconsin",
+      "team": "Wisconsin Badgers",
       "slot_note": "",
       "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Wisconsin Badgers"
     },
     {
       "region": "West",
       "seed": 12,
-      "team": "High Point",
+      "team": "High Point Panthers",
       "slot_note": "",
       "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "High Point Panthers"
     },
     {
       "region": "West",
       "seed": 4,
-      "team": "Arkansas",
+      "team": "Arkansas Razorbacks",
       "slot_note": "",
       "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Arkansas Razorbacks"
     },
     {
       "region": "West",
       "seed": 13,
-      "team": "Hawaii",
+      "team": "Hawai'i Rainbow Warriors",
       "slot_note": "",
       "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Hawai'i Rainbow Warriors"
     },
     {
       "region": "West",
       "seed": 6,
-      "team": "BYU",
+      "team": "BYU Cougars",
       "slot_note": "",
       "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "BYU Cougars"
     },
     {
       "region": "West",
       "seed": 11,
-      "team": "Texas / NC State",
+      "team": "Texas Longhorns",
       "slot_note": "First Four winner",
       "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Texas Longhorns"
     },
     {
       "region": "West",
       "seed": 3,
-      "team": "Gonzaga",
+      "team": "Gonzaga Bulldogs",
       "slot_note": "",
       "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Gonzaga Bulldogs"
     },
     {
       "region": "West",
       "seed": 14,
-      "team": "Kennesaw State",
+      "team": "Kennesaw State Owls",
       "slot_note": "",
       "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Kennesaw State Owls"
     },
     {
       "region": "West",
       "seed": 7,
-      "team": "Miami",
+      "team": "Miami Hurricanes",
       "slot_note": "",
       "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Miami Hurricanes"
     },
     {
       "region": "West",
       "seed": 10,
-      "team": "Missouri",
+      "team": "Missouri Tigers",
       "slot_note": "",
       "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Missouri Tigers"
     },
     {
       "region": "West",
       "seed": 2,
-      "team": "Purdue",
+      "team": "Purdue Boilermakers",
       "slot_note": "",
       "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Purdue Boilermakers"
     },
     {
       "region": "West",
       "seed": 15,
-      "team": "Queens University",
+      "team": "Queens University Royals",
       "slot_note": "",
       "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Queens University Royals"
     },
     {
       "region": "Midwest",
       "seed": 1,
-      "team": "Michigan",
+      "team": "Michigan Wolverines",
       "slot_note": "",
       "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Michigan Wolverines"
     },
     {
       "region": "Midwest",
       "seed": 16,
-      "team": "UMBC / Howard",
+      "team": "Howard Bison",
       "slot_note": "First Four winner",
       "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Howard Bison"
     },
     {
       "region": "Midwest",
       "seed": 8,
-      "team": "Georgia",
+      "team": "Georgia Bulldogs",
       "slot_note": "",
       "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Georgia Bulldogs"
     },
     {
       "region": "Midwest",
       "seed": 9,
-      "team": "Saint Louis",
+      "team": "Saint Louis Billikens",
       "slot_note": "",
       "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Saint Louis Billikens"
     },
     {
       "region": "Midwest",
       "seed": 5,
-      "team": "Texas Tech",
+      "team": "Texas Tech Red Raiders",
       "slot_note": "",
       "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Texas Tech Red Raiders"
     },
     {
       "region": "Midwest",
       "seed": 12,
-      "team": "Akron",
+      "team": "Akron Zips",
       "slot_note": "",
       "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Akron Zips"
     },
     {
       "region": "Midwest",
       "seed": 4,
-      "team": "Alabama",
+      "team": "Alabama Crimson Tide",
       "slot_note": "",
       "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Alabama Crimson Tide"
     },
     {
       "region": "Midwest",
       "seed": 13,
-      "team": "Hofstra",
+      "team": "Hofstra Pride",
       "slot_note": "",
       "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Hofstra Pride"
     },
     {
       "region": "Midwest",
       "seed": 6,
-      "team": "Tennessee",
+      "team": "Tennessee Volunteers",
       "slot_note": "",
       "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Tennessee Volunteers"
     },
     {
       "region": "Midwest",
       "seed": 11,
-      "team": "Miami (OH) / SMU",
+      "team": "Miami (OH) RedHawks",
       "slot_note": "First Four winner",
       "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Miami (OH) RedHawks"
     },
     {
       "region": "Midwest",
       "seed": 3,
-      "team": "Virginia",
+      "team": "Virginia Cavaliers",
       "slot_note": "",
       "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Virginia Cavaliers"
     },
     {
       "region": "Midwest",
       "seed": 14,
-      "team": "Wright State",
+      "team": "Wright State Raiders",
       "slot_note": "",
       "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Wright State Raiders"
     },
     {
       "region": "Midwest",
       "seed": 7,
-      "team": "Kentucky",
+      "team": "Kentucky Wildcats",
       "slot_note": "",
       "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Kentucky Wildcats"
     },
     {
       "region": "Midwest",
       "seed": 10,
-      "team": "Santa Clara",
+      "team": "Santa Clara Broncos",
       "slot_note": "",
       "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Santa Clara Broncos"
     },
     {
       "region": "Midwest",
       "seed": 2,
-      "team": "Iowa State",
+      "team": "Iowa State Cyclones",
       "slot_note": "",
       "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Iowa State Cyclones"
     },
     {
       "region": "Midwest",
       "seed": 15,
-      "team": "Tennessee State",
+      "team": "Tennessee State Tigers",
       "slot_note": "",
       "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Tennessee State Tigers"
     },
     {
       "region": "South",
       "seed": 1,
-      "team": "Florida",
+      "team": "Florida Gators",
       "slot_note": "",
       "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Florida Gators"
     },
     {
       "region": "South",
       "seed": 16,
-      "team": "Lehigh / Prairie View A&M",
+      "team": "Prairie View A&M Panthers",
       "slot_note": "First Four winner",
       "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Prairie View A&M Panthers"
     },
     {
       "region": "South",
       "seed": 8,
-      "team": "Clemson",
+      "team": "Clemson Tigers",
       "slot_note": "",
       "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Clemson Tigers"
     },
     {
       "region": "South",
       "seed": 9,
-      "team": "Iowa",
+      "team": "Iowa Hawkeyes",
       "slot_note": "",
       "assigned_name": "Dustin",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Iowa Hawkeyes"
     },
     {
       "region": "South",
       "seed": 5,
-      "team": "Vanderbilt",
+      "team": "Vanderbilt Commodores",
       "slot_note": "",
       "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Vanderbilt Commodores"
     },
     {
       "region": "South",
       "seed": 12,
-      "team": "McNeese",
+      "team": "McNeese Cowboys",
       "slot_note": "",
       "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "McNeese Cowboys"
     },
     {
       "region": "South",
       "seed": 4,
-      "team": "Nebraska",
+      "team": "Nebraska Cornhuskers",
       "slot_note": "",
       "assigned_name": "Dustin",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Nebraska Cornhuskers"
     },
     {
       "region": "South",
       "seed": 13,
-      "team": "Troy",
+      "team": "Troy Trojans",
       "slot_note": "",
       "assigned_name": "Dustin",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Troy Trojans"
     },
     {
       "region": "South",
       "seed": 6,
-      "team": "North Carolina",
+      "team": "North Carolina Tar Heels",
       "slot_note": "UNC",
       "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "North Carolina Tar Heels"
     },
     {
       "region": "South",
       "seed": 11,
-      "team": "VCU",
+      "team": "VCU Rams",
       "slot_note": "",
       "assigned_name": "Dustin",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "VCU Rams"
     },
     {
       "region": "South",
       "seed": 3,
-      "team": "Illinois",
+      "team": "Illinois Fighting Illini",
       "slot_note": "",
       "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Illinois Fighting Illini"
     },
     {
       "region": "South",
       "seed": 14,
-      "team": "Penn",
+      "team": "Pennsylvania Quakers",
       "slot_note": "",
       "assigned_name": "Dustin",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Pennsylvania Quakers"
     },
     {
       "region": "South",
       "seed": 7,
-      "team": "Saint Mary's",
+      "team": "Saint Mary's Gaels",
       "slot_note": "",
       "assigned_name": "Dustin",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Saint Mary's Gaels"
     },
     {
       "region": "South",
       "seed": 10,
-      "team": "Texas A&M",
+      "team": "Texas A&M Aggies",
       "slot_note": "",
       "assigned_name": "Dustin",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Texas A&M Aggies"
     },
     {
       "region": "South",
       "seed": 2,
-      "team": "Houston",
+      "team": "Houston Cougars",
       "slot_note": "",
       "assigned_name": "Dustin",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Houston Cougars"
     },
     {
       "region": "South",
       "seed": 15,
-      "team": "Idaho",
+      "team": "Idaho Vandals",
       "slot_note": "",
       "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
-      "prize_note": ""
+      "prize_note": "",
+      "espn_team": "Idaho Vandals"
     }
   ]
 }
