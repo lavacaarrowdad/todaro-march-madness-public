@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-03-18 22:41:07 UTC",
+  "last_updated": "2026-03-19 01:05:02 UTC",
   "teams": [
     {
       "region": "East",
       "seed": 1,
       "team": "Duke",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -16,7 +16,7 @@
       "seed": 16,
       "team": "Siena",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -26,7 +26,7 @@
       "seed": 8,
       "team": "Ohio State",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -36,7 +36,7 @@
       "seed": 9,
       "team": "TCU",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -46,7 +46,7 @@
       "seed": 5,
       "team": "St. John's",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -56,7 +56,7 @@
       "seed": 12,
       "team": "Northern Iowa",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -66,7 +66,7 @@
       "seed": 4,
       "team": "Kansas",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -76,7 +76,7 @@
       "seed": 13,
       "team": "Cal Baptist",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -86,7 +86,7 @@
       "seed": 6,
       "team": "Louisville",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -96,7 +96,7 @@
       "seed": 11,
       "team": "South Florida",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -106,7 +106,7 @@
       "seed": 3,
       "team": "Michigan State",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -116,7 +116,7 @@
       "seed": 14,
       "team": "North Dakota State",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -126,7 +126,7 @@
       "seed": 7,
       "team": "UCLA",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -136,7 +136,7 @@
       "seed": 10,
       "team": "UCF",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -146,7 +146,7 @@
       "seed": 2,
       "team": "UConn",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Madison",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -156,7 +156,7 @@
       "seed": 15,
       "team": "Furman",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Rob",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -166,7 +166,7 @@
       "seed": 1,
       "team": "Arizona",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -176,7 +176,7 @@
       "seed": 16,
       "team": "LIU",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -186,7 +186,7 @@
       "seed": 8,
       "team": "Villanova",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -196,7 +196,7 @@
       "seed": 9,
       "team": "Utah State",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -206,7 +206,7 @@
       "seed": 5,
       "team": "Wisconsin",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -216,7 +216,7 @@
       "seed": 12,
       "team": "High Point",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -226,7 +226,7 @@
       "seed": 4,
       "team": "Arkansas",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -236,7 +236,7 @@
       "seed": 13,
       "team": "Hawaii",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -246,7 +246,7 @@
       "seed": 6,
       "team": "BYU",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -256,7 +256,7 @@
       "seed": 11,
       "team": "Texas / NC State",
       "slot_note": "First Four winner",
-      "assigned_name": "",
+      "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -266,7 +266,7 @@
       "seed": 3,
       "team": "Gonzaga",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -276,7 +276,7 @@
       "seed": 14,
       "team": "Kennesaw State",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -286,7 +286,7 @@
       "seed": 7,
       "team": "Miami",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Mariah",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -296,7 +296,7 @@
       "seed": 10,
       "team": "Missouri",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -306,7 +306,7 @@
       "seed": 2,
       "team": "Purdue",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -316,7 +316,7 @@
       "seed": 15,
       "team": "Queens University",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anna",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -326,7 +326,7 @@
       "seed": 1,
       "team": "Michigan",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -336,7 +336,7 @@
       "seed": 16,
       "team": "UMBC / Howard",
       "slot_note": "First Four winner",
-      "assigned_name": "",
+      "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -346,7 +346,7 @@
       "seed": 8,
       "team": "Georgia",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -356,7 +356,7 @@
       "seed": 9,
       "team": "Saint Louis",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -366,7 +366,7 @@
       "seed": 5,
       "team": "Texas Tech",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -376,7 +376,7 @@
       "seed": 12,
       "team": "Akron",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -386,7 +386,7 @@
       "seed": 4,
       "team": "Alabama",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -396,7 +396,7 @@
       "seed": 13,
       "team": "Hofstra",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -406,7 +406,7 @@
       "seed": 6,
       "team": "Tennessee",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -416,7 +416,7 @@
       "seed": 11,
       "team": "Miami (OH) / SMU",
       "slot_note": "First Four winner",
-      "assigned_name": "",
+      "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -426,7 +426,7 @@
       "seed": 3,
       "team": "Virginia",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -436,7 +436,7 @@
       "seed": 14,
       "team": "Wright State",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -446,7 +446,7 @@
       "seed": 7,
       "team": "Kentucky",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Joseph",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -456,7 +456,7 @@
       "seed": 10,
       "team": "Santa Clara",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -466,7 +466,7 @@
       "seed": 2,
       "team": "Iowa State",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -476,7 +476,7 @@
       "seed": 15,
       "team": "Tennessee State",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Anthony",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -486,7 +486,7 @@
       "seed": 1,
       "team": "Florida",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -496,7 +496,7 @@
       "seed": 16,
       "team": "Lehigh / Prairie View A&M",
       "slot_note": "First Four winner",
-      "assigned_name": "",
+      "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -506,7 +506,7 @@
       "seed": 8,
       "team": "Clemson",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -516,7 +516,7 @@
       "seed": 9,
       "team": "Iowa",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Kids",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -526,7 +526,7 @@
       "seed": 5,
       "team": "Vanderbilt",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -536,7 +536,7 @@
       "seed": 12,
       "team": "McNeese",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -546,7 +546,7 @@
       "seed": 4,
       "team": "Nebraska",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Kids",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -556,7 +556,7 @@
       "seed": 13,
       "team": "Troy",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Kids",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -566,7 +566,7 @@
       "seed": 6,
       "team": "North Carolina",
       "slot_note": "UNC",
-      "assigned_name": "",
+      "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -576,7 +576,7 @@
       "seed": 11,
       "team": "VCU",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Kids",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -586,7 +586,7 @@
       "seed": 3,
       "team": "Illinois",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -596,7 +596,7 @@
       "seed": 14,
       "team": "Penn",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Kids",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -606,7 +606,7 @@
       "seed": 7,
       "team": "Saint Mary's",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Kids",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -616,7 +616,7 @@
       "seed": 10,
       "team": "Texas A&M",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Kids",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -626,7 +626,7 @@
       "seed": 2,
       "team": "Houston",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Kids",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
@@ -636,7 +636,7 @@
       "seed": 15,
       "team": "Idaho",
       "slot_note": "",
-      "assigned_name": "",
+      "assigned_name": "Shannon",
       "manual_status": "",
       "round_reached": "",
       "prize_note": ""
