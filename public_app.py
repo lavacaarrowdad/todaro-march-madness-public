@@ -427,9 +427,10 @@ def render_header(df, locked_results):
     .team-status{font-size:11px;color:#187a2f;margin-top:4px;font-weight:700;display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
     .money-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:#1f9f43;color:#fff;font-size:12px;font-weight:800;line-height:1;}
     .money-bills{font-size:13px;line-height:1;}
-    .live-line{margin-top:4px;font-size:10px;color:#1d2939;display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
-    .live-line.final{color:#0f5132;}
-    .live-chip{display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:16px;border-radius:999px;background:#111827;color:#fff;padding:0 6px;font-size:9px;font-weight:800;line-height:1;}
+    .live-line{margin-top:4px;font-size:10px;color:#166534;display:flex;gap:4px;align-items:center;flex-wrap:wrap;background:#ecfdf3;border:1px solid #86efac;border-radius:8px;padding:3px 6px;}
+    .live-line.final{color:#991b1b;background:#fef2f2;border:1px solid #fca5a5;}
+    .live-chip{display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:16px;border-radius:999px;background:#15803d;color:#fff;padding:0 6px;font-size:9px;font-weight:800;line-height:1;}
+    .live-line.final .live-chip{background:#b91c1c;}
     .live-time{color:#14532d;font-weight:700;}
     .live-detail{color:#667085;}
     @media (max-width: 768px) {
