@@ -13,7 +13,7 @@ import streamlit as st
 APP_TITLE = "2026 Todaro March Madness"
 DATA_PATH = Path(__file__).with_name("teams.json")
 LOCKED_RESULTS_PATH = Path(__file__).with_name("locked_results.json")
-BUILD_TIMESTAMP_CT = "Mar 19, 2026 8:30 AM CT"
+BUILD_TIMESTAMP_CT = "Mar 19, 2026 11:00 AM CT"
 
 TICKET_VALUES = {
     "Sweet 16": 1,
@@ -23,12 +23,15 @@ TICKET_VALUES = {
     "Championship": 4,
     "Champion": 4,
 }
-
 FIRST_ROUND_ORDER = [(1, 16), (8, 9), (5, 12), (4, 13), (6, 11), (3, 14), (7, 10), (2, 15)]
 
 
+def ct_now():
+    return datetime.now(ZoneInfo("America/Chicago"))
+
+
 def ct_now_str():
-    return datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %Y %I:%M:%S %p CT").replace(" 0", " ")
+    return ct_now().strftime("%b %d, %Y %I:%M:%S %p CT").replace(" 0", " ")
 
 
 def load_data():
@@ -90,6 +93,16 @@ def format_ct_datetime(date_str: str) -> str:
         return ""
 
 
+def format_ct_date_only(date_str: str) -> str:
+    if not date_str:
+        return ""
+    try:
+        dt = pd.to_datetime(date_str, utc=True).tz_convert(ZoneInfo("America/Chicago"))
+        return dt.strftime("%Y-%m-%d")
+    except Exception:
+        return ""
+
+
 def load_locked_results():
     if not LOCKED_RESULTS_PATH.exists():
         return {"games": [], "updated_at": ""}
@@ -128,6 +141,7 @@ def merge_finals_into_locked(games):
                 "status": "Final",
                 "detail": game.get("detail", ""),
                 "ct_time": game.get("ct_time", ""),
+                "ct_date": game.get("ct_date", ""),
                 "teams": teams,
                 "winner": winner_name,
             }
@@ -143,8 +157,8 @@ def merge_finals_into_locked(games):
 def fetch_recent_espn():
     url = "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard"
     team_map, games = {}, []
-    for offset in range(-1, 4):
-        d = (date.today() + timedelta(days=offset)).strftime("%Y%m%d")
+    for offset in range(0, 4):  # today forward only
+        d = (ct_now().date() + timedelta(days=offset)).strftime("%Y%m%d")
         try:
             r = requests.get(url, params={"groups": 50, "limit": 300, "dates": d}, timeout=12)
             r.raise_for_status()
@@ -161,6 +175,7 @@ def fetch_recent_espn():
             status = event.get("status", {}).get("type", {}).get("description", "") or ""
             detail = event.get("status", {}).get("type", {}).get("shortDetail", "") or ""
             ct_time = format_ct_datetime(event.get("date", "") or "")
+            ct_date = format_ct_date_only(event.get("date", "") or "")
             parsed = []
             for c in competitors:
                 parsed.append({
@@ -168,8 +183,9 @@ def fetch_recent_espn():
                     "score": str(c.get("score", "") or ""),
                     "winner": bool(c.get("winner", False)),
                 })
-            game = {"status": status, "detail": detail, "ct_time": ct_time, "teams": parsed}
+            game = {"status": status, "detail": detail, "ct_time": ct_time, "ct_date": ct_date, "teams": parsed}
             games.append(game)
+
             priority = 2 if status.lower() == "final" else 1 if status.lower() == "in progress" else 0
             for i, t in enumerate(parsed):
                 opp = parsed[1 - i]
@@ -183,6 +199,7 @@ def fetch_recent_espn():
                         "status": status,
                         "detail": detail,
                         "ct_time": ct_time,
+                        "ct_date": ct_date,
                         "winner": t["winner"],
                         "game": game,
                         "_priority": priority,
@@ -232,9 +249,6 @@ def matchup_game_for_card(team_a, team_b, live_map, recent_games, locked_games, 
         for game in reversed(recent_games):
             if teams_match_game(team_a, team_b, game):
                 return game
-        for game in reversed(locked_games):
-            if teams_match_game(team_a, team_b, game):
-                return game
     if team_a:
         game_a = get_game_for_single_team(team_a, live_map)
         if game_a:
@@ -243,6 +257,7 @@ def matchup_game_for_card(team_a, team_b, live_map, recent_games, locked_games, 
         game_b = get_game_for_single_team(team_b, live_map)
         if game_b:
             return game_b
+    # only use locked finals for advancement, not display of current matchup info
     return None
 
 
@@ -331,15 +346,17 @@ def live_line(row, live_map):
     if not live:
         return ""
     status = str(live.get("status", "") or "")
+    if status.lower() == "scheduled":
+        return ""
     if status.lower() == "in progress":
         label = "LIVE"
     elif status.lower() == "final":
         label = "W" if live.get("winner") else "L"
     else:
-        label = "SCHED"
+        return ""
     detail_html = f'<span class="live-detail">{safe(live.get("detail", ""))}</span>' if str(live.get("detail", "")).strip() else ""
     time_html = f'<span class="live-time">{safe(live.get("ct_time", ""))}</span>' if str(live.get("ct_time", "")).strip() else ""
-    score_text = f'{safe(live.get("score", ""))}-{safe(live.get("opp_score", ""))} vs {safe(live.get("opp", ""))}' if status.lower() in {"in progress", "final"} else f'vs {safe(live.get("opp", ""))}'
+    score_text = f'{safe(live.get("score", ""))}-{safe(live.get("opp_score", ""))} vs {safe(live.get("opp", ""))}'
     cls = "live-line final" if status.lower() == "final" else "live-line"
     return f'<div class="{cls}"><span class="live-chip">{safe(label)}</span><span>{score_text}</span>{time_html}{detail_html}</div>'
 
@@ -419,6 +436,8 @@ def render(df, live_map, recent_games, locked_results):
     last_refresh_ct = ct_now_str()
     st.markdown("""
         <style>
+        html, body, [data-testid="stAppViewContainer"], [data-testid="stVerticalBlock"] {overflow-y: visible !important;}
+        .main .block-container{padding-top:1rem;padding-bottom:4rem;max-width:100%;}
         .bracket-wrap{padding:8px 0 24px 0;}
         .mobile-note{color:#667085;font-size:13px;margin:0 0 14px 4px;}
         .legend{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 14px 4px;font-size:12px;color:#667085;}
@@ -435,7 +454,7 @@ def render(df, live_map, recent_games, locked_results):
         .totals-title{font-size:16px;font-weight:800;color:#182230;margin-bottom:10px;}
         .totals-grid{display:flex;gap:12px;flex-wrap:wrap;}
         .total-chip{border:1px solid #d8e5dc;border-radius:999px;padding:8px 12px;font-size:13px;font-weight:700;color:#14532d;background:#f3fff5;display:inline-flex;align-items:center;gap:8px;}
-        .region-section{background:#fff;border:1px solid #e7ebf2;border-radius:20px;padding:18px 16px;margin-bottom:18px;overflow-x:auto;}
+        .region-section{background:#fff;border:1px solid #e7ebf2;border-radius:20px;padding:18px 16px;margin-bottom:18px;overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;}
         .region-name{font-size:28px;font-weight:800;margin:2px 0 14px 6px;color:#182230;}
         .region-board{display:grid;grid-template-columns:220px 220px 220px 220px 220px;grid-template-rows:repeat(15,146px);column-gap:16px;row-gap:14px;align-items:start;min-width:1164px;}
         .placed{align-self:start;}
@@ -462,6 +481,15 @@ def render(df, live_map, recent_games, locked_results):
         .live-chip{display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:16px;border-radius:999px;background:#111827;color:#fff;padding:0 6px;font-size:9px;font-weight:800;line-height:1;}
         .live-time{color:#14532d;font-weight:700;}
         .live-detail{color:#667085;}
+        @media (max-width: 768px) {
+            .region-section{padding:14px 10px;margin-bottom:16px;}
+            .region-name{font-size:22px;margin:2px 0 10px 4px;}
+            .region-board{grid-template-columns:190px 190px 190px 190px 190px;grid-template-rows:repeat(15,136px);min-width:1014px;column-gap:12px;row-gap:12px;}
+            .match-card{width:190px;height:136px;padding:8px 8px 6px;}
+            .title-box{width:180px;}
+            .team-name{max-width:95px;font-size:13px;}
+            .team-sub,.team-status,.live-line,.matchup-meta{font-size:9px;}
+        }
         </style>
         """, unsafe_allow_html=True)
 
@@ -473,7 +501,7 @@ def render(df, live_map, recent_games, locked_results):
     totals_block = f'<div class="totals-strip"><div class="totals-title">Total tickets won</div><div class="totals-grid">{totals_html}</div></div>'
     locked_note = f'Locked finals cache updated: {safe(locked_results["updated_at"])}' if locked_results.get("updated_at") else "Locked finals cache not created yet."
     timestamp_block = f'<div class="timestamp-strip"><div class="timestamp-row"><span><strong>App build:</strong> {safe(BUILD_TIMESTAMP_CT)}</span><span><strong>Last page refresh:</strong> {safe(last_refresh_ct)}</span><span><strong>{locked_note}</strong></span></div></div>'
-    st.markdown('<div class="bracket-wrap"><div class="mobile-note">Public bracket only. Sweet 16 and later rounds award tickets. Final games are cached locally after they are seen once. ESPN mapping can now be set manually in the admin app for reliable schedule/live/final matching.</div>' + timestamp_block + '<div class="legend">' + legend_html + '</div>' + totals_block + title_html + '</div>', unsafe_allow_html=True)
+    st.markdown('<div class="bracket-wrap"><div class="mobile-note">Only today-forward games are used for schedule and score display. Before tipoff, cards show the Central Time start. Old non-tournament scores are hidden from current cards.</div>' + timestamp_block + '<div class="legend">' + legend_html + '</div>' + totals_block + title_html + '</div>', unsafe_allow_html=True)
     for region in ["South", "West", "East", "Midwest"]:
         st.markdown(build_region(df[df["region"] == region], region, live_map, recent_games, locked_games), unsafe_allow_html=True)
 
