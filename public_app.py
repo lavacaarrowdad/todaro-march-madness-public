@@ -13,7 +13,7 @@ import streamlit as st
 APP_TITLE = "2026 Todaro March Madness"
 DATA_PATH = Path(__file__).with_name("teams.json")
 LOCKED_RESULTS_PATH = Path(__file__).with_name("locked_results.json")
-BUILD_TIMESTAMP_CT = "Mar 19, 2026 12:07 PM CT"
+BUILD_TIMESTAMP_CT = "Mar 19, 2026 1:42 PM CT"
 
 TICKET_VALUES = {"Sweet 16": 1, "Elite 8": 2, "Elite Eight": 2, "Final Four": 3, "Championship": 4, "Champion": 4}
 FIRST_ROUND_ORDER = [(1, 16), (8, 9), (5, 12), (4, 13), (6, 11), (3, 14), (7, 10), (2, 15)]
@@ -164,8 +164,7 @@ def get_game_for_single_team(team_row, live_map: dict):
 def teams_match_game(team_a, team_b, game):
     if not team_a or not team_b or not game:
         return False
-    aliases_a = team_aliases(lookup_name(team_a))
-    aliases_b = team_aliases(lookup_name(team_b))
+    aliases_a = team_aliases(lookup_name(team_a)); aliases_b = team_aliases(lookup_name(team_b))
     teams = game.get("teams", [])
     if len(teams) != 2:
         return False
@@ -248,12 +247,7 @@ def matchup_info_line(team_a, team_b, live_map, recent_games, prefer_top_team=Fa
     detail = str(info.get("detail", "") or "").strip()
     if not ct_time and not detail and not status:
         return ""
-    if status.lower() == "in progress":
-        label = "LIVE"
-    elif status.lower() == "final":
-        label = "FINAL"
-    else:
-        label = "SCHED"
+    label = "LIVE" if status.lower() == "in progress" else "FINAL" if status.lower() == "final" else "SCHED"
     detail_html = f'<span class="matchup-detail">{safe(detail)}</span>' if detail else ""
     time_html = f'<span class="matchup-time">{safe(ct_time)}</span>' if ct_time else ""
     return f'<div class="matchup-meta"><span class="matchup-chip">{safe(label)}</span>{time_html}{detail_html}</div>'
@@ -267,11 +261,8 @@ def live_line(row, live_map):
     status = str(live.get("status", "") or "")
     if status.lower() == "scheduled":
         return ""
-    if status.lower() == "in progress":
-        label = "LIVE"
-    elif status.lower() == "final":
-        label = "W" if live.get("winner") else "L"
-    else:
+    label = "LIVE" if status.lower() == "in progress" else ("W" if live.get("winner") else "L") if status.lower() == "final" else ""
+    if not label:
         return ""
     my_aliases = team_aliases(lookup_name(row))
     score_text = ""
@@ -292,8 +283,7 @@ def live_line(row, live_map):
 def team_line(row, live_map):
     if row is None:
         return '<div class="team-row tbd"><div class="team-main"><span class="seed">•</span><span class="team-name">TBD</span></div></div>'
-    ticket_ct = tickets_for(row)
-    badge = icon_html() if ticket_ct else ""
+    ticket_ct = tickets_for(row); badge = icon_html() if ticket_ct else ""
     status = safe(row.get("manual_status", ""))
     status_html = f'<div class="team-status">{badge}{status}</div>' if status else (f'<div class="team-status">{badge}{ticket_label(ticket_ct)}</div>' if ticket_ct else "")
     sub = []
@@ -343,6 +333,14 @@ def build_region(region_df, region_name, live_map, recent_games, locked_games):
     placed.append(f'<div class="placed" style="grid-column:5;grid-row:8 / span 1;">{ff}</div>')
     return f'<div class="region-section"><div class="region-name">{safe(region_name)}</div><div class="region-board">{"".join(placed)}</div></div>'
 
+def matchup_list_card_html(team1, team2, meta, detail, label, score_line=""):
+    cls = "matchup-list-card"
+    if label == "LIVE": cls += " live"
+    elif label == "FINAL": cls += " final"
+    score_html = f'<div class="matchup-list-score">{safe(score_line)}</div>' if score_line else ""
+    detail_html = f'<div class="matchup-list-detail">{safe(detail)}</div>' if detail else ""
+    return f'<div class="{cls}"><div class="matchup-list-teams"><div><strong>{safe(team1)}</strong></div><div>vs</div><div><strong>{safe(team2)}</strong></div></div><div class="matchup-list-meta">{safe(meta)}</div>{score_html}{detail_html}</div>'
+
 def render_matchup_list(df, live_map, recent_games):
     st.markdown("### Mobile-friendly game list")
     for region in ["South","West","East","Midwest"]:
@@ -350,23 +348,20 @@ def render_matchup_list(df, live_map, recent_games):
         with st.expander(region, expanded=(region == "South")):
             for a, b in region_matchups(region_df):
                 info = matchup_game_for_card(a,b,live_map,recent_games,prefer_top_team=True)
+                label = ""; score_line = ""
                 if info:
                     status = str(info.get("status","") or "")
                     label = "LIVE" if status.lower()=="in progress" else "FINAL" if status.lower()=="final" else "SCHED"
                     meta = f"{label} · {info.get('ct_time','')}"
                     detail = info.get("detail","")
+                    teams = info.get("teams", [])
+                    if label in {"LIVE","FINAL"} and len(teams) == 2:
+                        score_line = f"{teams[0].get('team','')} {teams[0].get('score','')} — {teams[1].get('score','')} {teams[1].get('team','')}"
                 else:
                     meta = "No current game found"; detail = ""
                 t1 = f"{a.get('team','TBD')} ({a.get('assigned_name','').strip() or 'Unassigned'})"
                 t2 = f"{b.get('team','TBD')} ({b.get('assigned_name','').strip() or 'Unassigned'})"
-                st.markdown(matchup_list_card_html(t1, t2, meta, detail, label if info else ""), unsafe_allow_html=True)
-                live_a = get_live_for_team(a, live_map)
-                if live_a and str(live_a.get("status","")).lower() in {"in progress","final"}:
-                    game = live_a.get("game") or {}
-                    teams = game.get("teams", [])
-                    if len(teams) == 2:
-                        st.caption(f"{teams[0].get('team','')}: {teams[0].get('score','')} | {teams[1].get('team','')}: {teams[1].get('score','')}")
-                st.divider()
+                st.markdown(matchup_list_card_html(t1, t2, meta, detail, label, score_line), unsafe_allow_html=True)
 
 def render_standings(df):
     st.markdown("### Ticket standings")
@@ -375,22 +370,6 @@ def render_standings(df):
         st.info("No tickets won yet."); return
     rows = [{"Name": k, "Tickets": v} for k, v in sorted(totals.items(), key=lambda x: (-x[1], x[0].lower()))]
     st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
-
-
-def matchup_list_card_html(team1, team2, meta, detail, label):
-    cls = "matchup-list-card"
-    if label == "LIVE":
-        cls += " live"
-    elif label == "FINAL":
-        cls += " final"
-    detail_html = f'<div class="matchup-list-detail">{safe(detail)}</div>' if detail else ""
-    return (
-        f'<div class="{cls}">'
-        f'<div class="matchup-list-teams"><div><strong>{safe(team1)}</strong></div><div>vs</div><div><strong>{safe(team2)}</strong></div></div>'
-        f'<div class="matchup-list-meta">{safe(meta)}</div>'
-        f'{detail_html}'
-        f'</div>'
-    )
 
 def render_header(df, locked_results):
     assigned = sorted({str(x).strip() for x in df["assigned_name"].fillna("") if str(x).strip()})[:10]
@@ -401,7 +380,7 @@ def render_header(df, locked_results):
     totals_block = f'<div class="totals-strip"><div class="totals-title">Total tickets won</div><div class="totals-grid">{totals_html}</div></div>'
     locked_note = f'Locked finals cache updated: {safe(locked_results["updated_at"])}' if locked_results.get("updated_at") else "Locked finals cache not created yet."
     timestamp_block = f'<div class="timestamp-strip"><div class="timestamp-row"><span><strong>App build:</strong> {safe(BUILD_TIMESTAMP_CT)}</span><span><strong>Last page refresh:</strong> {safe(ct_now_str())}</span><span><strong>{locked_note}</strong></span></div></div>'
-    st.markdown("""
+    css = """
     <style>
     html, body, [data-testid="stAppViewContainer"], [data-testid="stVerticalBlock"] {overflow-y: visible !important;}
     .main .block-container{padding-top:1rem;padding-bottom:4rem;max-width:100%;}
@@ -449,23 +428,28 @@ def render_header(df, locked_results):
     .live-line.final .live-chip{background:#b91c1c;}
     .live-time{color:#14532d;font-weight:700;}
     .live-detail{color:#667085;}
-    .matchup-list-card{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;margin-bottom:8px;background:#ffffff;}
+    .matchup-list-card{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;margin-bottom:10px;background:#ffffff;}
     .matchup-list-card.live{background:#ecfdf3;border-color:#86efac;}
     .matchup-list-card.final{background:#fef2f2;border-color:#fca5a5;}
     .matchup-list-teams{display:flex;flex-direction:column;gap:2px;color:#111827;}
     .matchup-list-meta{margin-top:6px;font-size:12px;font-weight:700;color:#374151;}
-    .matchup-list-detail{margin-top:2px;font-size:12px;color:#6b7280;}
+    .matchup-list-score{margin-top:8px;font-size:20px;font-weight:900;line-height:1.2;color:#111827;}
+    .matchup-list-card.live .matchup-list-score{color:#166534;}
+    .matchup-list-card.final .matchup-list-score{color:#991b1b;}
+    .matchup-list-detail{margin-top:4px;font-size:12px;color:#6b7280;}
     @media (max-width: 768px) {
-        .region-section{padding:14px 10px;margin-bottom:16px;}
-        .region-name{font-size:22px;margin:2px 0 10px 4px;}
-        .region-board{grid-template-columns:190px 190px 190px 190px 190px;grid-template-rows:repeat(15,136px);min-width:1014px;column-gap:12px;row-gap:12px;}
-        .match-card{width:190px;height:136px;padding:8px 8px 6px;}
-        .title-box{width:180px;}
-        .team-name{max-width:95px;font-size:13px;}
-        .team-sub,.team-status,.live-line,.matchup-meta{font-size:9px;}
+      .region-section{padding:14px 10px;margin-bottom:16px;}
+      .region-name{font-size:22px;margin:2px 0 10px 4px;}
+      .region-board{grid-template-columns:190px 190px 190px 190px 190px;grid-template-rows:repeat(15,136px);min-width:1014px;column-gap:12px;row-gap:12px;}
+      .match-card{width:190px;height:136px;padding:8px 8px 6px;}
+      .title-box{width:180px;}
+      .team-name{max-width:95px;font-size:13px;}
+      .team-sub,.team-status,.live-line,.matchup-meta{font-size:9px;}
+      .matchup-list-score{font-size:18px;}
     }
     </style>
-    """, unsafe_allow_html=True)
+    """
+    st.markdown(css, unsafe_allow_html=True)
     st.markdown('<div class="bracket-wrap"><div class="mobile-note">Only today-forward games are used for schedule and score display. On phones, switch to Matchups or Standings for easier navigation.</div>' + timestamp_block + '<div class="legend">' + legend_html + '</div>' + totals_block + title_html + '</div>', unsafe_allow_html=True)
 
 def render_matchups_and_views(df, live_map, recent_games, locked_results):
