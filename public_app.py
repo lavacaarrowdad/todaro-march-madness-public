@@ -316,11 +316,14 @@ def stake_badge_html(tickets: int) -> str:
     return f'<div class="stake-badge">{icon_html()}<span>{safe(ticket_label(tickets))} at stake</span></div>'
 
 def matchup_card(top_row, bottom_row, live_map, recent_games, title="", tickets=0, prefer_top_team=False):
+    title_html = ""
+    stake_html = ""
     if title:
         cls = "match-title money-round-title" if tickets else "match-title"
         label = title
         title_html = f'<div class="{cls}">{safe(label)}</div>'
-    stake_html = stake_badge_html(tickets)
+    if tickets:
+        stake_html = stake_badge_html(tickets)
     extra = " money-round-card" if tickets else ""
     meta_html = matchup_info_line(top_row, bottom_row, live_map, recent_games, prefer_top_team=prefer_top_team)
     return f'<div class="match-card{extra}">{title_html}{stake_html}{meta_html}{team_line(top_row, live_map)}{team_line(bottom_row, live_map)}</div>'
