@@ -252,6 +252,8 @@ def matchup_info_line(team_a, team_b, live_map, recent_games, prefer_top_team=Fa
     if not ct_time and not detail and not status:
         return ""
     label = "LIVE" if is_live_like(status) else "FINAL" if status.lower() == "final" else "SCHED"
+    if label == "SCHED":
+        detail = ""
     detail_html = f'<span class="matchup-detail">{safe(detail)}</span>' if detail else ""
     time_html = f'<span class="matchup-time">{safe(ct_time)}</span>' if ct_time else ""
     return f'<div class="matchup-meta"><span class="matchup-chip">{safe(label)}</span>{time_html}{detail_html}</div>'
@@ -410,11 +412,15 @@ def render_matchup_list(df, live_map, recent_games, locked_games):
                     if info:
                         status = str(info.get("status","") or "")
                         label = "LIVE" if is_live_like(status) else "FINAL" if status.lower()=="final" else "SCHED"
-                        meta = f"{label} · {info.get('ct_time','')}"
-                        detail = info.get("detail","")
+                        ct_time = str(info.get("ct_time","") or "")
+                        detail = str(info.get("detail","") or "")
+                        meta = f"{label} · {ct_time}" if ct_time else label
                         teams = info.get("teams", [])
                         if label in {"LIVE","FINAL"} and len(teams) == 2:
                             score_line = f"{teams[0].get('team','')} {teams[0].get('score','')} — {teams[1].get('score','')} {teams[1].get('team','')}"
+                        # Hide redundant ESPN detail on scheduled cards so CT shows only once.
+                        if label == "SCHED":
+                            detail = ""
                     else:
                         meta = "Awaiting prior result" if card.get("formed") else "Not formed yet"
                         detail = ""
