@@ -171,6 +171,15 @@ def teams_match_game(team_a, team_b, game):
     g0 = normalize_team_name(teams[0]["team"]); g1 = normalize_team_name(teams[1]["team"])
     return (g0 in aliases_a and g1 in aliases_b) or (g0 in aliases_b and g1 in aliases_a)
 
+
+def exact_matchup_game(team_a, team_b, recent_games, locked_games):
+    if not team_a or not team_b:
+        return None
+    for game in list(reversed(recent_games)) + list(reversed(locked_games)):
+        if teams_match_game(team_a, team_b, game):
+            return game
+    return None
+
 def matchup_game_for_card(team_a, team_b, live_map, recent_games, prefer_top_team=False):
     if not team_a and not team_b:
         return None
@@ -300,15 +309,21 @@ def team_line(row, live_map):
     extra = " money-team" if ticket_ct else ""
     return f'<div class="team-row{extra}" style="background:{person_color(row.get("assigned_name",""))}"><div class="team-main"><span class="seed">{safe(row["seed"])}</span><span class="team-name">{safe(row["team"])}</span>{badge}</div>{sub_html}{status_html}{live_line(row, live_map)}</div>'
 
+
+def stake_badge_html(tickets: int) -> str:
+    if not tickets:
+        return ""
+    return f'<div class="stake-badge">{icon_html()}<span>{safe(ticket_label(tickets))} at stake</span></div>'
+
 def matchup_card(top_row, bottom_row, live_map, recent_games, title="", tickets=0, prefer_top_team=False):
-    title_html = ""
     if title:
         cls = "match-title money-round-title" if tickets else "match-title"
-        label = ticket_label(tickets) if tickets else title
-        title_html = f'<div class="{cls}">{icon_html() if tickets else ""}{safe(label)}</div>'
+        label = title
+        title_html = f'<div class="{cls}">{safe(label)}</div>'
+    stake_html = stake_badge_html(tickets)
     extra = " money-round-card" if tickets else ""
     meta_html = matchup_info_line(top_row, bottom_row, live_map, recent_games, prefer_top_team=prefer_top_team)
-    return f'<div class="match-card{extra}">{title_html}{meta_html}{team_line(top_row, live_map)}{team_line(bottom_row, live_map)}</div>'
+    return f'<div class="match-card{extra}">{title_html}{stake_html}{meta_html}{team_line(top_row, live_map)}{team_line(bottom_row, live_map)}</div>'
 
 def region_matchups(region_df):
     seed_to_row = {int(r["seed"]): r.to_dict() for _, r in region_df.iterrows()}
@@ -383,13 +398,14 @@ def build_region_rounds(region_df, live_map, recent_games, locked_games):
         "Final Four": final_four,
     }
 
-def matchup_list_card_html(team1, team2, meta, detail, label, score_line=""):
+def matchup_list_card_html(team1, team2, meta, detail, label, score_line="", tickets=0):
     cls = "matchup-list-card"
     if label == "LIVE": cls += " live"
     elif label == "FINAL": cls += " final"
     score_html = f'<div class="matchup-list-score">{safe(score_line)}</div>' if score_line else ""
     detail_html = f'<div class="matchup-list-detail">{safe(detail)}</div>' if detail else ""
-    return f'<div class="{cls}"><div class="matchup-list-teams"><div><strong>{safe(team1)}</strong></div><div>vs</div><div><strong>{safe(team2)}</strong></div></div><div class="matchup-list-meta">{safe(meta)}</div>{score_html}{detail_html}</div>'
+    stake_html = f'<div class="matchup-list-stake">{icon_html()}<span>{safe(ticket_label(tickets))} at stake</span></div>' if tickets else ""
+    return f'<div class="{cls}"><div class="matchup-list-teams"><div><strong>{safe(team1)}</strong></div><div>vs</div><div><strong>{safe(team2)}</strong></div></div><div class="matchup-list-meta">{safe(meta)}</div>{score_html}{stake_html}{detail_html}</div>'
 
 def render_matchup_list(df, live_map, recent_games, locked_games):
     st.markdown("### Mobile-friendly game list")
@@ -403,30 +419,41 @@ def render_matchup_list(df, live_map, recent_games, locked_games):
                 if not shown:
                     continue
                 st.markdown(f"**{round_name}**")
+                round_tickets = {"Sweet 16": 1, "Elite 8": 2, "Final Four": 3, "Championship": 4}.get(round_name, 0)
                 for card in shown:
                     a = card.get("team1")
                     b = card.get("team2")
-                    info = matchup_game_for_card(a, b, live_map, recent_games, prefer_top_team=True)
+
+                    exact_game = exact_matchup_game(a, b, recent_games, locked_games) if a and b else None
+                    info = exact_game if exact_game else matchup_game_for_card(a, b, live_map, recent_games, prefer_top_team=True)
+
                     label = ""
                     score_line = ""
                     if info:
                         status = str(info.get("status","") or "")
                         label = "LIVE" if is_live_like(status) else "FINAL" if status.lower()=="final" else "SCHED"
                         ct_time = str(info.get("ct_time","") or "")
-                        detail = str(info.get("detail","") or "")
                         meta = f"{label} · {ct_time}" if ct_time else label
+                        detail = str(info.get("detail","") or "")
+
                         teams = info.get("teams", [])
-                        if label in {"LIVE","FINAL"} and len(teams) == 2:
+                        if len(teams) == 2 and label in {"LIVE","FINAL"}:
                             score_line = f"{teams[0].get('team','')} {teams[0].get('score','')} — {teams[1].get('score','')} {teams[1].get('team','')}"
-                        # Hide redundant ESPN detail on scheduled cards so CT shows only once.
+
+                        if label == "FINAL" and len(teams) == 2:
+                            winner = teams[0].get("team","") if teams[0].get("winner") else teams[1].get("team","") if teams[1].get("winner") else ""
+                            if winner:
+                                detail = f"{winner} won"
+
                         if label == "SCHED":
                             detail = ""
                     else:
                         meta = "Awaiting prior result" if card.get("formed") else "Not formed yet"
                         detail = ""
+
                     t1 = f"{a.get('team','TBD')} ({a.get('assigned_name','').strip() or 'Unassigned'})" if a else "TBD"
                     t2 = f"{b.get('team','TBD')} ({b.get('assigned_name','').strip() or 'Unassigned'})" if b else "TBD"
-                    st.markdown(matchup_list_card_html(t1, t2, meta, detail, label, score_line), unsafe_allow_html=True)
+                    st.markdown(matchup_list_card_html(t1, t2, meta, detail, label, score_line, round_tickets), unsafe_allow_html=True)
 
 def render_standings(df):
     st.markdown("### Ticket standings")
@@ -441,7 +468,7 @@ def render_header(df, locked_results):
     legend_html = "".join(f'<span><i class="dot" style="background:{person_color(n)}"></i>{safe(n)}</span>' for n in assigned) or '<span><i class="dot" style="background:#f5f7fb"></i>No assignments yet</span>'
     totals = totals_by_name(df)
     totals_html = "".join(f'<div class="total-chip">{icon_html()}<span>{safe(n)}: {safe(ticket_label(v))}</span></div>' for n, v in sorted(totals.items(), key=lambda x: (-x[1], x[0].lower()))) or '<div class="total-chip"><span>No tickets won yet</span></div>'
-    title_html = '<div class="title-strip"><div class="title-box"><h3>Sweet 16</h3><div class="big">1 🎟️</div><div class="small">1 ticket</div></div><div class="title-box"><h3>Elite 8</h3><div class="big">2 🎟️</div><div class="small">2 tickets</div></div><div class="title-box"><h3>Final Four</h3><div class="big">3 🎟️</div><div class="small">3 tickets</div></div><div class="title-box"><h3>Championship</h3><div class="big">4 🎟️</div><div class="small">4 tickets</div></div></div>'
+    title_html = ""
     totals_block = f'<div class="totals-strip"><div class="totals-title">Total tickets won</div><div class="totals-grid">{totals_html}</div></div>'
     locked_note = f'Locked finals cache updated: {safe(locked_results["updated_at"])}' if locked_results.get("updated_at") else "Locked finals cache not created yet."
     timestamp_block = f'<div class="timestamp-strip"><div class="timestamp-row"><span><strong>App build:</strong> {safe(BUILD_TIMESTAMP_CT)}</span><span><strong>Last page refresh:</strong> {safe(ct_now_str())}</span><span><strong>{locked_note}</strong></span></div></div>'
@@ -453,12 +480,12 @@ def render_header(df, locked_results):
     .legend{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 14px 4px;font-size:12px;color:#667085;}
     .legend span{display:inline-flex;align-items:center;gap:6px;}
     .dot{width:12px;height:12px;border-radius:999px;display:inline-block;border:1px solid rgba(0,0,0,.08);}
-    .title-strip,.totals-strip,.timestamp-strip{background:#fff;border:1px solid #e7ebf2;border-radius:18px;padding:14px 16px;margin-bottom:18px;}
-    .title-strip{display:flex;justify-content:center;gap:24px;align-items:center;flex-wrap:wrap;}
-    .title-box{width:220px;background:#eefbf0;border:1px solid #9ed3a7;border-radius:16px;padding:14px;text-align:center;}
-    .title-box h3{margin:0 0 6px 0;font-size:18px;color:#182230;}
-    .title-box .big{font-size:28px;font-weight:800;margin:6px 0;color:#182230;}
-    .title-box .small{font-size:13px;color:#667085;}
+    
+    
+    
+    
+    
+    
     .timestamp-row{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:#344054;}
     .timestamp-row span{display:inline-flex;gap:6px;align-items:center;}
     .totals-title{font-size:16px;font-weight:800;color:#182230;margin-bottom:10px;}
@@ -472,6 +499,8 @@ def render_header(df, locked_results):
     .match-card.money-round-card{background:#eefbf0;border-color:#9ed3a7;}
     .match-title{font-size:11px;font-weight:700;text-transform:uppercase;color:#7a6d61;margin-bottom:6px;letter-spacing:.35px;}
     .match-title.money-round-title{color:#187a2f;}
+    .stake-badge{display:inline-flex;align-items:center;gap:6px;margin-bottom:6px;padding:4px 8px;border-radius:999px;background:#eefbf0;border:1px solid #9ed3a7;color:#166534;font-size:11px;font-weight:800;}
+    .stake-badge .money-bills{font-size:12px;}
     .matchup-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:10px;color:#475467;}
     .matchup-chip{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:16px;border-radius:999px;background:#344054;color:#fff;padding:0 6px;font-size:9px;font-weight:800;line-height:1;}
     .matchup-time{color:#14532d;font-weight:700;}
@@ -501,12 +530,12 @@ def render_header(df, locked_results):
     .matchup-list-card.live .matchup-list-score{color:#166534;}
     .matchup-list-card.final .matchup-list-score{color:#991b1b;}
     .matchup-list-detail{margin-top:4px;font-size:12px;color:#6b7280;}
+    .matchup-list-stake{margin-top:8px;display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:#eefbf0;border:1px solid #9ed3a7;color:#166534;font-size:11px;font-weight:800;}
     @media (max-width: 768px) {
       .region-section{padding:14px 10px;margin-bottom:16px;}
       .region-name{font-size:22px;margin:2px 0 10px 4px;}
       .region-board{grid-template-columns:190px 190px 190px 190px 190px;grid-template-rows:repeat(15,136px);min-width:1014px;column-gap:12px;row-gap:12px;}
       .match-card{width:190px;height:136px;padding:8px 8px 6px;}
-      .title-box{width:180px;}
       .team-name{max-width:95px;font-size:13px;}
       .team-sub,.team-status,.live-line,.matchup-meta{font-size:9px;}
       .matchup-list-score{font-size:18px;}
@@ -514,7 +543,7 @@ def render_header(df, locked_results):
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
-    st.markdown('<div class="bracket-wrap"><div class="mobile-note">Bracket view restored. Halftime and other in-game pause states count as live.</div>' + timestamp_block + '<div class="legend">' + legend_html + '</div>' + totals_block + title_html + '</div>', unsafe_allow_html=True)
+    st.markdown('<div class="bracket-wrap"><div class="mobile-note">Bracket view restored. Halftime and other in-game pause states count as live.</div>' + timestamp_block + '<div class="legend">' + legend_html + '</div>' + totals_block + '</div>', unsafe_allow_html=True)
 
 def render_views(df, live_map, recent_games, locked_results):
     render_header(df, locked_results)
