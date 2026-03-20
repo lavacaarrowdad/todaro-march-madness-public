@@ -337,6 +337,50 @@ def build_region(region_df, region_name, live_map, recent_games, locked_games):
     placed.append(f'<div class="placed" style="grid-column:5;grid-row:8 / span 1;">{ff}</div>')
     return f'<div class="region-section"><div class="region-name">{safe(region_name)}</div><div class="region-board">{"".join(placed)}</div></div>'
 
+
+
+def build_region_rounds(region_df, live_map, recent_games, locked_games):
+    m = region_matchups(region_df)
+    round64 = []
+    r64_winners = []
+    for a, b in m:
+        formed = bool(a and b)
+        round64.append({"round": "Round of 64", "team1": a, "team2": b, "formed": formed})
+        r64_winners.append(decide_winner(a, b, recent_games, locked_games) if formed else None)
+
+    pairs32 = [(r64_winners[0], r64_winners[1]), (r64_winners[2], r64_winners[3]), (r64_winners[4], r64_winners[5]), (r64_winners[6], r64_winners[7])]
+    round32 = []
+    r32_winners = []
+    for a, b in pairs32:
+        formed = bool(a and b)
+        round32.append({"round": "Round of 32", "team1": a, "team2": b, "formed": formed})
+        r32_winners.append(decide_winner(a, b, recent_games, locked_games) if formed else None)
+
+    pairs16 = [(r32_winners[0], r32_winners[1]), (r32_winners[2], r32_winners[3])]
+    sweet16 = []
+    r16_winners = []
+    for a, b in pairs16:
+        formed = bool(a and b)
+        sweet16.append({"round": "Sweet 16", "team1": a, "team2": b, "formed": formed})
+        r16_winners.append(decide_winner(a, b, recent_games, locked_games) if formed else None)
+
+    elite8 = []
+    elite_winner = None
+    if r16_winners[0] and r16_winners[1]:
+        elite8.append({"round": "Elite 8", "team1": r16_winners[0], "team2": r16_winners[1], "formed": True})
+        elite_winner = decide_winner(r16_winners[0], r16_winners[1], recent_games, locked_games)
+    else:
+        elite8.append({"round": "Elite 8", "team1": r16_winners[0], "team2": r16_winners[1], "formed": False})
+
+    final_four = [{"round": "Final Four", "team1": elite_winner, "team2": None, "formed": bool(elite_winner)}]
+    return {
+        "Round of 64": round64,
+        "Round of 32": round32,
+        "Sweet 16": sweet16,
+        "Elite 8": elite8,
+        "Final Four": final_four,
+    }
+
 def matchup_list_card_html(team1, team2, meta, detail, label, score_line=""):
     cls = "matchup-list-card"
     if label == "LIVE": cls += " live"
@@ -345,27 +389,38 @@ def matchup_list_card_html(team1, team2, meta, detail, label, score_line=""):
     detail_html = f'<div class="matchup-list-detail">{safe(detail)}</div>' if detail else ""
     return f'<div class="{cls}"><div class="matchup-list-teams"><div><strong>{safe(team1)}</strong></div><div>vs</div><div><strong>{safe(team2)}</strong></div></div><div class="matchup-list-meta">{safe(meta)}</div>{score_html}{detail_html}</div>'
 
-def render_matchup_list(df, live_map, recent_games):
+def render_matchup_list(df, live_map, recent_games, locked_games):
     st.markdown("### Mobile-friendly game list")
     for region in ["South","West","East","Midwest"]:
         region_df = df[df["region"] == region]
+        rounds = build_region_rounds(region_df, live_map, recent_games, locked_games)
         with st.expander(region, expanded=(region == "South")):
-            for a, b in region_matchups(region_df):
-                info = matchup_game_for_card(a,b,live_map,recent_games,prefer_top_team=True)
-                label = ""; score_line = ""
-                if info:
-                    status = str(info.get("status","") or "")
-                    label = "LIVE" if is_live_like(status) else "FINAL" if status.lower()=="final" else "SCHED"
-                    meta = f"{label} · {info.get('ct_time','')}"
-                    detail = info.get("detail","")
-                    teams = info.get("teams", [])
-                    if label in {"LIVE","FINAL"} and len(teams) == 2:
-                        score_line = f"{teams[0].get('team','')} {teams[0].get('score','')} — {teams[1].get('score','')} {teams[1].get('team','')}"
-                else:
-                    meta = "No current game found"; detail = ""
-                t1 = f"{a.get('team','TBD')} ({a.get('assigned_name','').strip() or 'Unassigned'})"
-                t2 = f"{b.get('team','TBD')} ({b.get('assigned_name','').strip() or 'Unassigned'})"
-                st.markdown(matchup_list_card_html(t1, t2, meta, detail, label, score_line), unsafe_allow_html=True)
+            for round_name in ["Round of 64", "Round of 32", "Sweet 16", "Elite 8", "Final Four"]:
+                cards = rounds.get(round_name, [])
+                shown = [c for c in cards if c.get("team1") or c.get("team2")]
+                if not shown:
+                    continue
+                st.markdown(f"**{round_name}**")
+                for card in shown:
+                    a = card.get("team1")
+                    b = card.get("team2")
+                    info = matchup_game_for_card(a, b, live_map, recent_games, prefer_top_team=True)
+                    label = ""
+                    score_line = ""
+                    if info:
+                        status = str(info.get("status","") or "")
+                        label = "LIVE" if is_live_like(status) else "FINAL" if status.lower()=="final" else "SCHED"
+                        meta = f"{label} · {info.get('ct_time','')}"
+                        detail = info.get("detail","")
+                        teams = info.get("teams", [])
+                        if label in {"LIVE","FINAL"} and len(teams) == 2:
+                            score_line = f"{teams[0].get('team','')} {teams[0].get('score','')} — {teams[1].get('score','')} {teams[1].get('team','')}"
+                    else:
+                        meta = "Awaiting prior result" if card.get("formed") else "Not formed yet"
+                        detail = ""
+                    t1 = f"{a.get('team','TBD')} ({a.get('assigned_name','').strip() or 'Unassigned'})" if a else "TBD"
+                    t2 = f"{b.get('team','TBD')} ({b.get('assigned_name','').strip() or 'Unassigned'})" if b else "TBD"
+                    st.markdown(matchup_list_card_html(t1, t2, meta, detail, label, score_line), unsafe_allow_html=True)
 
 def render_standings(df):
     st.markdown("### Ticket standings")
@@ -459,7 +514,7 @@ def render_views(df, live_map, recent_games, locked_results):
     render_header(df, locked_results)
     view = st.segmented_control("View", options=["Matchups", "Bracket", "Standings"], default="Matchups", width="stretch")
     if view == "Matchups":
-        render_matchup_list(df, live_map, recent_games)
+        render_matchup_list(df, live_map, recent_games, locked_results.get("games", []))
     elif view == "Standings":
         render_standings(df)
     else:
