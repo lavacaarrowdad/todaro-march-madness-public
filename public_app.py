@@ -401,6 +401,15 @@ def build_region_rounds(region_df, live_map, recent_games, locked_games):
         "Final Four": final_four,
     }
 
+
+
+def game_ct_date(info):
+    ct_time = str((info or {}).get("ct_time", "") or "").strip()
+    if not ct_time:
+        return ""
+    m = re.match(r"^[A-Za-z]{3} ([A-Za-z]{3} \d{2}),", ct_time)
+    return m.group(1) if m else ""
+
 def matchup_list_card_html(team1, team2, meta, detail, label, score_line="", tickets=0):
     cls = "matchup-list-card"
     if label == "LIVE": cls += " live"
@@ -412,51 +421,96 @@ def matchup_list_card_html(team1, team2, meta, detail, label, score_line="", tic
 
 def render_matchup_list(df, live_map, recent_games, locked_games):
     st.markdown("### Mobile-friendly game list")
+
+    today_label = ct_now().strftime("%b %d")
+    visible_sections = []
+    past_sections = {}
+
     for region in ["South","West","East","Midwest"]:
         region_df = df[df["region"] == region]
         rounds = build_region_rounds(region_df, live_map, recent_games, locked_games)
-        with st.expander(region, expanded=(region == "South")):
-            for round_name in ["Round of 64", "Round of 32", "Sweet 16", "Elite 8", "Final Four"]:
-                cards = rounds.get(round_name, [])
-                shown = [c for c in cards if c.get("team1") or c.get("team2")]
-                if not shown:
+
+        for round_name in ["Round of 64", "Round of 32", "Sweet 16", "Elite 8", "Final Four"]:
+            cards = rounds.get(round_name, [])
+            round_tickets = {"Sweet 16": 1, "Elite 8": 2, "Final Four": 3, "Championship": 4}.get(round_name, 0)
+
+            for card in cards:
+                a = card.get("team1")
+                b = card.get("team2")
+                if not (a or b):
                     continue
-                st.markdown(f"**{round_name}**")
-                round_tickets = {"Sweet 16": 1, "Elite 8": 2, "Final Four": 3, "Championship": 4}.get(round_name, 0)
-                for card in shown:
-                    a = card.get("team1")
-                    b = card.get("team2")
 
-                    exact_game = exact_matchup_game(a, b, recent_games, locked_games) if a and b else None
-                    info = exact_game if exact_game else matchup_game_for_card(a, b, live_map, recent_games, prefer_top_team=True)
+                exact_game = exact_matchup_game(a, b, recent_games, locked_games) if a and b else None
+                info = exact_game if exact_game else matchup_game_for_card(a, b, live_map, recent_games, prefer_top_team=True)
 
-                    label = ""
-                    score_line = ""
-                    if info:
-                        status = str(info.get("status","") or "")
-                        label = "LIVE" if is_live_like(status) else "FINAL" if status.lower()=="final" else "SCHED"
-                        ct_time = str(info.get("ct_time","") or "")
-                        meta = f"{label} · {ct_time}" if ct_time else label
-                        detail = str(info.get("detail","") or "")
-
-                        teams = info.get("teams", [])
-                        if len(teams) == 2 and label in {"LIVE","FINAL"}:
-                            score_line = f"{teams[0].get('team','')} {teams[0].get('score','')} — {teams[1].get('score','')} {teams[1].get('team','')}"
-
-                        if label == "FINAL" and len(teams) == 2:
-                            winner = teams[0].get("team","") if teams[0].get("winner") else teams[1].get("team","") if teams[1].get("winner") else ""
-                            if winner:
-                                detail = f"{winner} won"
-
-                        if label == "SCHED":
-                            detail = ""
-                    else:
-                        meta = "Awaiting prior result" if card.get("formed") else "Not formed yet"
+                label = ""
+                score_line = ""
+                if info:
+                    status = str(info.get("status","") or "")
+                    label = "LIVE" if is_live_like(status) else "FINAL" if status.lower()=="final" else "SCHED"
+                    ct_time = str(info.get("ct_time","") or "")
+                    meta = f"{label} · {ct_time}" if ct_time else label
+                    detail = str(info.get("detail","") or "")
+                    teams = info.get("teams", [])
+                    if label in {"LIVE","FINAL"} and len(teams) == 2:
+                        score_line = f"{teams[0].get('team','')} {teams[0].get('score','')} — {teams[1].get('score','')} {teams[1].get('team','')}"
+                    if label == "FINAL" and len(teams) == 2:
+                        winner = teams[0].get("team","") if teams[0].get("winner") else teams[1].get("team","") if teams[1].get("winner") else ""
+                        if winner:
+                            detail = f"{winner} won"
+                    if label == "SCHED":
                         detail = ""
+                else:
+                    meta = "Awaiting prior result" if card.get("formed") else "Not formed yet"
+                    detail = ""
+                    ct_time = ""
 
-                    t1 = f"{a.get('team','TBD')} ({a.get('assigned_name','').strip() or 'Unassigned'})" if a else "TBD"
-                    t2 = f"{b.get('team','TBD')} ({b.get('assigned_name','').strip() or 'Unassigned'})" if b else "TBD"
-                    st.markdown(matchup_list_card_html(t1, t2, meta, detail, label, score_line, round_tickets), unsafe_allow_html=True)
+                t1 = f"{a.get('team','TBD')} ({a.get('assigned_name','').strip() or 'Unassigned'})" if a else "TBD"
+                t2 = f"{b.get('team','TBD')} ({b.get('assigned_name','').strip() or 'Unassigned'})" if b else "TBD"
+                card_html = matchup_list_card_html(t1, t2, meta, detail, label, score_line, round_tickets)
+
+                entry = {
+                    "region": region,
+                    "round": round_name,
+                    "html": card_html,
+                    "date_label": game_ct_date(info) if info else "",
+                    "label": label,
+                }
+
+                if label == "FINAL" and entry["date_label"] and entry["date_label"] != today_label:
+                    past_sections.setdefault(entry["date_label"], []).append(entry)
+                else:
+                    visible_sections.append(entry)
+
+    if visible_sections:
+        current_region = None
+        current_round = None
+        for entry in visible_sections:
+            if entry["region"] != current_region:
+                current_region = entry["region"]
+                current_round = None
+                st.markdown(f"## {current_region}")
+            if entry["round"] != current_round:
+                current_round = entry["round"]
+                st.markdown(f"**{current_round}**")
+            st.markdown(entry["html"], unsafe_allow_html=True)
+    else:
+        st.info("No current or upcoming games to show.")
+
+    if past_sections:
+        for date_label in sorted(past_sections.keys(), reverse=True):
+            with st.expander(f"Completed games — {date_label}", expanded=False):
+                current_region = None
+                current_round = None
+                for entry in past_sections[date_label]:
+                    if entry["region"] != current_region:
+                        current_region = entry["region"]
+                        current_round = None
+                        st.markdown(f"## {current_region}")
+                    if entry["round"] != current_round:
+                        current_round = entry["round"]
+                        st.markdown(f"**{current_round}**")
+                    st.markdown(entry["html"], unsafe_allow_html=True)
 
 def render_standings(df):
     st.markdown("### Ticket standings")
