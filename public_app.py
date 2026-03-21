@@ -183,19 +183,21 @@ def exact_matchup_game(team_a, team_b, recent_games, locked_games):
 def matchup_game_for_card(team_a, team_b, live_map, recent_games, prefer_top_team=False):
     if not team_a and not team_b:
         return None
-    if prefer_top_team and team_a:
-        tg = get_game_for_single_team(team_a, live_map)
-        if tg:
-            return tg
+    # For formed matchups, always prefer the exact matchup's own game/result first.
     if team_a and team_b:
         for game in reversed(recent_games):
             if teams_match_game(team_a, team_b, game):
                 return game
-    if team_a:
+    # Only fall back to a single team's next scheduled/live game when the card is not yet fully formed.
+    if prefer_top_team and team_a and not team_b:
+        tg = get_game_for_single_team(team_a, live_map)
+        if tg:
+            return tg
+    if team_a and not team_b:
         ga = get_game_for_single_team(team_a, live_map)
         if ga:
             return ga
-    if team_b:
+    if team_b and not team_a:
         gb = get_game_for_single_team(team_b, live_map)
         if gb:
             return gb
