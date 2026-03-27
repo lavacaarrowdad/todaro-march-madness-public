@@ -32,6 +32,13 @@ def safe(v):
     return html.escape(str(v or ""))
 
 
+def person_color(name: str) -> str:
+    if not str(name or "").strip():
+        return "#f5f7fb"
+    palette = ["#e8f1ff", "#f6e8ff", "#e9fff4", "#fff3e8", "#eef0ff", "#ffeef5", "#eefcf2", "#fff9df", "#edf7ff", "#f3edff"]
+    return palette[sum(ord(c) for c in str(name).strip().lower()) % len(palette)]
+
+
 def normalize_team_name(name: str) -> str:
     s = (name or "").lower().strip()
     s = s.replace("&", " and ").replace("st.", "saint").replace("st ", "saint ").replace("(oh)", " ohio").replace("/", " ")
