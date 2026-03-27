@@ -46,23 +46,44 @@ def normalize_team_name(name: str) -> str:
 
 def team_aliases(team_name: str):
     raw = (team_name or "").strip()
-    aliases = {normalize_team_name(raw)}
+    aliases = set()
+    if not raw:
+        return aliases
+
+    def add_variant(v: str):
+        nv = normalize_team_name(v)
+        if not nv:
+            return
+        aliases.add(nv)
+        parts = nv.split()
+        if len(parts) >= 2:
+            aliases.add(" ".join(parts[:2]))
+        if len(parts) >= 1:
+            aliases.add(parts[0])
+
+    add_variant(raw)
     for p in [x.strip() for x in raw.split("/") if x.strip()]:
-        aliases.add(normalize_team_name(p))
+        add_variant(p)
+
     manual = {
         "saint mary s": ["saint marys", "saint mary's"],
         "north carolina": ["unc"],
         "miami ohio smu": ["miami ohio", "smu"],
         "umbc howard": ["umbc", "howard"],
-        "lehigh prairie view a m": ["lehigh", "prairie view a m", "prairie view am"],
+        "lehigh prairie view a m": ["lehigh", "prairie view a m", "prairie view am", "prairie view"],
         "texas nc state": ["texas", "nc state"],
         "saint john s": ["saint johns", "st john s", "st johns"],
         "south florida": ["usf"],
         "connecticut": ["uconn"],
+        "ohio state": ["ohio state buckeyes"],
+        "texas a m": ["texas am", "texas a&m"],
+        "brigham young": ["byu"],
     }
     nr = normalize_team_name(raw)
     if nr in manual:
-        aliases.update(manual[nr])
+        for v in manual[nr]:
+            add_variant(v)
+
     return aliases
 
 
@@ -217,26 +238,70 @@ def get_game_for_single_team(team_row, live_map: dict):
     info = get_live_for_team(team_row, live_map)
     return info.get("game") if info else None
 
+def names_fuzzy_match(name_a: str, name_b: str) -> bool:
+    a = normalize_team_name(name_a)
+    b = normalize_team_name(name_b)
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    if a.startswith(b) or b.startswith(a):
+        return True
+    sa = set(a.split())
+    sb = set(b.split())
+    if len(sa) >= 1 and len(sb) >= 1:
+        inter = sa & sb
+        if len(inter) >= min(2, len(sa), len(sb)):
+            return True
+    return False
+
+def row_aliases(team_row) -> set:
+    aliases = set()
+    if not team_row:
+        return aliases
+    aliases.update(team_aliases(team_row.get("team", "")))
+    aliases.update(team_aliases(team_row.get("espn_team", "")))
+    return {a for a in aliases if a}
+
+def row_matches_game_name(team_row, game_name: str) -> bool:
+    if not team_row or not game_name:
+        return False
+    game_norm = normalize_team_name(game_name)
+    aliases = row_aliases(team_row)
+    if game_norm in aliases:
+        return True
+    for a in aliases:
+        if names_fuzzy_match(a, game_norm):
+            return True
+    return False
+
 
 def teams_match_game(team_a, team_b, game):
     if not team_a or not team_b or not game:
         return False
-    aliases_a = team_aliases(lookup_name(team_a))
-    aliases_b = team_aliases(lookup_name(team_b))
     teams = game.get("teams", [])
     if len(teams) != 2:
         return False
-    g0 = normalize_team_name(teams[0]["team"])
-    g1 = normalize_team_name(teams[1]["team"])
-    return (g0 in aliases_a and g1 in aliases_b) or (g0 in aliases_b and g1 in aliases_a)
+    g0 = teams[0].get("team", "")
+    g1 = teams[1].get("team", "")
+    return (row_matches_game_name(team_a, g0) and row_matches_game_name(team_b, g1)) or (row_matches_game_name(team_a, g1) and row_matches_game_name(team_b, g0))
 
 
 def exact_matchup_game(team_a, team_b, recent_games, locked_games):
     if not team_a or not team_b:
         return None
+    finals = []
+    others = []
     for game in list(reversed(recent_games)) + list(reversed(locked_games)):
         if teams_match_game(team_a, team_b, game):
-            return game
+            if str(game.get("status", "")).lower() == "final":
+                finals.append(game)
+            else:
+                others.append(game)
+    if finals:
+        return finals[0]
+    if others:
+        return others[0]
     return None
 
 
